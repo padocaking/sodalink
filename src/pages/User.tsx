@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 const userData = {
   name: 'EMPRESA',
   clientNumber: '319233674',
@@ -37,9 +39,9 @@ function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string;
   );
 }
 
-function AccountRow({ icon, label }: { icon: React.ReactNode; label: string }) {
+function AccountRow({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick?: () => void }) {
   return (
-    <button className="w-full flex items-center justify-between py-3.5 border-b border-gray-100 last:border-0">
+    <button onClick={onClick} className="w-full flex items-center justify-between py-3.5 border-b border-gray-100 last:border-0">
       <div className="flex items-center gap-3">
         <div className="shrink-0">{icon}</div>
         <span className="text-sm font-medium text-gray-800">{label}</span>
@@ -50,6 +52,7 @@ function AccountRow({ icon, label }: { icon: React.ReactNode; label: string }) {
 }
 
 export default function User() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-full bg-gray-100 px-4 py-5 space-y-5">
 
@@ -78,7 +81,7 @@ export default function User() {
         <h2 className="text-lg font-semibold text-gray-800 mb-3">Minha conta</h2>
         <div className="bg-white rounded-2xl px-5 shadow-sm">
           <AccountRow icon={miLg('monetization_on')} label="Meu crédito" />
-          <AccountRow icon={miLg('local_shipping')}  label="Meus pedidos" />
+          <AccountRow icon={miLg('local_shipping')}  label="Meus pedidos" onClick={() => navigate('/pedido')} />
           <AccountRow icon={miLg('receipt')}          label="Meus Boletos" />
           <AccountRow icon={miLg('star_border')}      label="Premia" />
           <AccountRow icon={miLg('chat_bubble_outline')} label="Mudar idioma" />
