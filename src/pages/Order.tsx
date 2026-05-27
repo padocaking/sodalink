@@ -1,6 +1,34 @@
 import { useState } from 'react';
+import OrderCard from '../components/OrderCard';
+import type { OrderData } from '../components/OrderCard';
 
 type Tab = 'andamento' | 'historico';
+
+const sampleOrders: OrderData[] = [
+  {
+    orderNumber: '40028922',
+    status: 'andamento',
+    dateLabel: '10 janeiro',
+    createdAt: '10 janeiro 2026 - 12:02',
+    total: '1398,99',
+  },
+  {
+    orderNumber: '40028921',
+    status: 'entregue',
+    dateLabel: '01 janeiro',
+    createdAt: '01 janeiro 2026 - 12:42',
+    deliveredAt: '02 janeiro 2026 - 10:05',
+    total: '358,50',
+  },
+  {
+    orderNumber: '40028922',
+    status: 'cancelado',
+    dateLabel: '01 janeiro',
+    createdAt: '01 janeiro 2026 - 12:32',
+    cancelledAt: '01 janeiro 2026 - 13:02',
+    total: '999,99',
+  },
+];
 
 function SadBagIllustration() {
   return (
@@ -72,12 +100,6 @@ export default function Order() {
   return (
     <div className="min-h-full bg-gray-100 px-4 py-5 flex flex-col">
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-xl font-bold text-gray-800">Pedidos</h1>
-        <span className="material-icons text-gray-700 text-[1.6rem]">shopping_cart</span>
-      </div>
-
       {/* Tabs */}
       <div className="relative flex bg-gray-200 rounded-full mb-6 p-1">
         {/* Sliding indicator */}
@@ -109,23 +131,30 @@ export default function Order() {
         </button>
       </div>
 
-      {/* Empty state */}
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-4 pb-10">
-        <p className="text-gray-500 text-sm mb-6">
-          {activeTab === 'andamento'
-            ? 'Você não tem nenhum pedido em entrega'
-            : 'Você não tem nenhum pedido no histórico'}
-        </p>
+      {activeTab === 'historico' ? (
+        /* Order history list */
+        <div className="flex flex-col gap-4 pb-4">
+          {sampleOrders.map((order, index) => (
+            <OrderCard key={index} order={order} />
+          ))}
+        </div>
+      ) : (
+        /* Empty state */
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-4 pb-10">
+          <p className="text-gray-500 text-sm mb-6">
+            Você não tem nenhum pedido em entrega
+          </p>
 
-        <SadBagIllustration />
+          <SadBagIllustration />
 
-        <button
-          onClick={() => window.history.back()}
-          className="mt-8 bg-red-600 text-white font-semibold py-3 rounded-full w-[60%] text-sm hover:bg-red-700 transition-colors"
-        >
-          ← Voltar
-        </button>
-      </div>
+          <button
+            onClick={() => window.history.back()}
+            className="mt-8 bg-red-600 text-white font-semibold py-3 rounded-full w-[60%] text-sm hover:bg-red-700 transition-colors"
+          >
+            ← Voltar
+          </button>
+        </div>
+      )}
 
     </div>
   );
