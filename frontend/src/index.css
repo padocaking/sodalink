@@ -10,3 +10,14 @@
     font-family: var(--font-sans);
   }
 }
+
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.45); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.heart-pop {
+  animation: heart-pop 0.35s ease-in-out;
+}

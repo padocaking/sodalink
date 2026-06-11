@@ -2,6 +2,8 @@ import { useState, useRef } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Category from './pages/Category';
 import Categories from './pages/Categories';
+import Product from './pages/Product';
+import Favorites from './pages/Favorites';
 import Home from './pages/Home';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
@@ -13,7 +15,7 @@ import { getStoredUser, logout, type AuthUser } from './auth';
 function App() {
   const [user, setUser] = useState<AuthUser | null>(getStoredUser);
   const location = useLocation();
-  const isCategoryPage = location.pathname.startsWith('/categoria');
+  const isCategoryPage = location.pathname.startsWith('/categoria') || location.pathname.startsWith('/favoritos');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -125,6 +127,8 @@ function App() {
             <Route path="/pedido" element={<Order />} />
             <Route path="/categoria/:slug" element={<Category />} />
             <Route path="/categorias" element={<Categories />} />
+            <Route path="/produto/:slug" element={<Product />} />
+            <Route path="/favoritos" element={<Favorites />} />
             <Route path="/conta" element={<User user={user} onLogout={handleLogout} />} />
           </Routes>
         </div>
