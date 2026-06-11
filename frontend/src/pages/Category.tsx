@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { fetchFavorites, fetchProducts, type Product } from '../api';
+import { fetchCart, fetchFavorites, fetchProducts, type CartItem, type Product } from '../api';
 import ProductCard from '../components/ProductCard';
 
 export default function Category() {
@@ -8,6 +8,7 @@ export default function Category() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
+  const [cartQty, setCartQty] = useState<Map<number, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -17,10 +18,12 @@ export default function Category() {
     Promise.all([
       fetchProducts({ categorySlug: slug }),
       fetchFavorites().catch(() => [] as Product[]),
+      fetchCart().catch(() => [] as CartItem[]),
     ])
-      .then(([prods, favs]) => {
+      .then(([prods, favs, cart]) => {
         setProducts(prods);
         setFavoriteIds(new Set(favs.map((f) => f.id)));
+        setCartQty(new Map(cart.map((c) => [c.productId, c.quantity])));
       })
       .catch(() => setError('Não foi possível carregar os produtos.'))
       .finally(() => setLoading(false));
@@ -40,7 +43,7 @@ export default function Category() {
         <button aria-label="Buscar">
           <span className="material-icons text-gray-800">search</span>
         </button>
-        <Link to="/pedido" aria-label="Carrinho">
+        <Link to="/carrinho" aria-label="Carrinho">
           <span className="material-icons text-gray-800">shopping_cart</span>
         </Link>
       </header>
@@ -74,7 +77,12 @@ export default function Category() {
             <p className="text-sm text-gray-500 mb-3">São {products.length} produtos</p>
             <div className="grid grid-cols-2 gap-3 pb-6">
               {products.map((p) => (
-                <ProductCard key={p.id} product={p} favorited={favoriteIds.has(p.id)} />
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  favorited={favoriteIds.has(p.id)}
+                  initialQty={cartQty.get(p.id) ?? 0}
+                />
               ))}
             </div>
             {products.length === 0 && !error && (

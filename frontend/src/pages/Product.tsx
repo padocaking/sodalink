@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchFavorites, formatPrice, type Product as ProductType } from '../api';
+import { fetchCart, fetchFavorites, formatPrice, setCartItem, type CartItem, type Product as ProductType } from '../api';
 import FavoriteButton from '../components/FavoriteButton';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
@@ -21,13 +21,21 @@ export default function Product() {
         return res.json() as Promise<ProductType>;
       }),
       fetchFavorites().catch(() => [] as ProductType[]),
+      fetchCart().catch(() => [] as CartItem[]),
     ])
-      .then(([prod, favs]) => {
+      .then(([prod, favs, cart]) => {
         setProduct(prod);
         setFav(favs.some((f) => f.id === prod.id));
+        setQty(cart.find((c) => c.productId === prod.id)?.quantity ?? 0);
       })
       .catch(() => setError('Não foi possível carregar o produto.'));
   }, [slug]);
+
+  const changeQty = (next: number) => {
+    if (!product) return;
+    setQty(next);
+    setCartItem(product.id, next).catch(() => setQty(qty));
+  };
 
   const [reais, centavos] = product
     ? Number(product.price).toFixed(2).split('.')
@@ -101,7 +109,7 @@ export default function Product() {
       <div className="absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-4 py-3 flex items-center gap-3">
         <button
           aria-label="Diminuir"
-          onClick={() => setQty((q) => Math.max(0, q - 1))}
+          onClick={() => changeQty(Math.max(0, qty - 1))}
           className={`w-11 h-11 rounded-full flex items-center justify-center text-white shrink-0 ${qty > 0 ? 'bg-red-600' : 'bg-gray-300'}`}
         >
           <span className="material-icons">remove</span>
@@ -111,7 +119,7 @@ export default function Product() {
         </div>
         <button
           aria-label="Aumentar"
-          onClick={() => setQty((q) => q + 1)}
+          onClick={() => changeQty(qty + 1)}
           className="w-11 h-11 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0"
         >
           <span className="material-icons">add</span>

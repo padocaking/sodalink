@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatPrice, type Product } from '../api';
+import { formatPrice, setCartItem, type Product } from '../api';
 import FavoriteButton from './FavoriteButton';
 
 interface Props {
@@ -8,10 +8,16 @@ interface Props {
   favorited: boolean;
   onFavoriteChange?: (favorited: boolean) => void;
   showStepper?: boolean;
+  initialQty?: number;
 }
 
-export default function ProductCard({ product, favorited, onFavoriteChange, showStepper = true }: Props) {
-  const [qty, setQty] = useState(0);
+export default function ProductCard({ product, favorited, onFavoriteChange, showStepper = true, initialQty = 0 }: Props) {
+  const [qty, setQty] = useState(initialQty);
+
+  const changeQty = (next: number) => {
+    setQty(next);
+    setCartItem(product.id, next).catch(() => setQty(qty));
+  };
 
   const [reais, centavos] = Number(product.price).toFixed(2).split('.');
 
@@ -56,7 +62,7 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
       <div className="mt-3 flex items-center justify-between bg-gray-50 rounded-full px-1 py-1">
         <button
           aria-label="Diminuir"
-          onClick={() => setQty((q) => Math.max(0, q - 1))}
+          onClick={() => changeQty(Math.max(0, qty - 1))}
           className={`w-7 h-7 rounded-full flex items-center justify-center text-white ${qty > 0 ? 'bg-red-600' : 'bg-gray-300'}`}
         >
           <span className="material-icons text-[1.1rem]">remove</span>
@@ -64,7 +70,7 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
         <span className="text-sm font-semibold text-gray-800">{qty}</span>
         <button
           aria-label="Aumentar"
-          onClick={() => setQty((q) => q + 1)}
+          onClick={() => changeQty(qty + 1)}
           className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-white"
         >
           <span className="material-icons text-[1.1rem]">add</span>

@@ -28,7 +28,7 @@ export default function Favorites() {
           <span className="material-icons text-gray-800">arrow_back_ios_new</span>
         </button>
         <h1 className="flex-1 text-2xl font-semibold text-gray-900">Favoritos</h1>
-        <Link to="/pedido" aria-label="Carrinho">
+        <Link to="/carrinho" aria-label="Carrinho">
           <span className="material-icons text-gray-800">shopping_cart</span>
         </Link>
       </header>

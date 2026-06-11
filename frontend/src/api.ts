@@ -60,5 +60,65 @@ export async function toggleFavorite(productId: number): Promise<boolean> {
   return data.favorited;
 }
 
+export interface CartItem {
+  id: number;
+  productId: number;
+  quantity: number;
+  product: Product;
+}
+
+export interface OrderItem {
+  id: number;
+  quantity: number;
+  unitPrice: string;
+  totalPrice: string;
+  product: { id: number; name: string; slug: string; imageUrl: string | null; unit: string };
+}
+
+export interface Order {
+  id: number;
+  orderNumber: string;
+  status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+  subtotal: string;
+  total: string;
+  createdAt: string;
+  deliveredAt: string | null;
+  cancelledAt: string | null;
+  orderItems: OrderItem[];
+}
+
+export async function fetchCart(): Promise<CartItem[]> {
+  const res = await fetch(`${API_URL}/api/cart`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Erro ao buscar carrinho (${res.status})`);
+  return res.json();
+}
+
+export async function setCartItem(productId: number, quantity: number): Promise<void> {
+  const res = await fetch(`${API_URL}/api/cart/${productId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ quantity }),
+  });
+  if (!res.ok) throw new Error(`Erro ao atualizar carrinho (${res.status})`);
+}
+
+export async function clearCart(): Promise<void> {
+  const res = await fetch(`${API_URL}/api/cart`, { method: 'DELETE', headers: authHeaders() });
+  if (!res.ok) throw new Error(`Erro ao esvaziar carrinho (${res.status})`);
+}
+
+export async function createOrder(): Promise<Order> {
+  const res = await fetch(`${API_URL}/api/orders`, { method: 'POST', headers: authHeaders() });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.error ?? 'Erro ao finalizar pedido');
+  return data;
+}
+
+export async function fetchOrders(): Promise<Order[]> {
+  const res = await fetch(`${API_URL}/api/orders`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Erro ao buscar pedidos (${res.status})`);
+  return res.json();
+}
+
 export const formatPrice = (value: string | number) =>
   Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
