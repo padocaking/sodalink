@@ -21,7 +21,7 @@ function CategoryTile({ label, to, children }: { label: string; to: string; chil
 function PromoCard({ product }: { product: Product }) {
   return (
     <Link
-      to={`/categoria/${product.category.slug}`}
+      to={`/produto/${product.slug}`}
       className="min-w-44 bg-white rounded-2xl shadow-sm overflow-hidden shrink-0"
     >
       <div className="relative h-28 bg-gray-100 flex items-center justify-center">

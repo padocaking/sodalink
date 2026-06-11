@@ -21,9 +21,9 @@ export default function Header() {
       <div className="flex items-center gap-5">
         {!isOrderPage && (
           <>
-            <button aria-label="Favorites" className="w-6 h-6">
+            <Link to="/favoritos" aria-label="Favorites" className="w-6 h-6">
               <img src={heartIcon} alt="Favorites" className="w-full h-full" />
-            </button>
+            </Link>
             <button aria-label="Search" className="w-6 h-6">
               <img src={searchIcon} alt="Search" className="w-full h-full" />
             </button>

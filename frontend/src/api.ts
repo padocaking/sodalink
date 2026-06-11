@@ -39,5 +39,26 @@ export const fetchProducts = (params?: { categorySlug?: string; featured?: boole
   return get<Product[]>(`/api/products${qs ? `?${qs}` : ''}`);
 };
 
+function authHeaders(): Record<string, string> {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export async function fetchFavorites(): Promise<Product[]> {
+  const res = await fetch(`${API_URL}/api/favorites`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Erro ao buscar favoritos (${res.status})`);
+  return res.json();
+}
+
+export async function toggleFavorite(productId: number): Promise<boolean> {
+  const res = await fetch(`${API_URL}/api/favorites/${productId}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`Erro ao favoritar (${res.status})`);
+  const data = await res.json();
+  return data.favorited;
+}
+
 export const formatPrice = (value: string | number) =>
   Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
