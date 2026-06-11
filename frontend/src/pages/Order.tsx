@@ -1,34 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import OrderCard from '../components/OrderCard';
 import type { OrderData } from '../components/OrderCard';
+import { fetchOrders, type Order as ApiOrder } from '../api';
 
 type Tab = 'andamento' | 'historico';
 
-const sampleOrders: OrderData[] = [
-  {
-    orderNumber: '40028922',
-    status: 'andamento',
-    dateLabel: '10 janeiro',
-    createdAt: '10 janeiro 2026 - 12:02',
-    total: '1398,99',
-  },
-  {
-    orderNumber: '40028921',
-    status: 'entregue',
-    dateLabel: '01 janeiro',
-    createdAt: '01 janeiro 2026 - 12:42',
-    deliveredAt: '02 janeiro 2026 - 10:05',
-    total: '358,50',
-  },
-  {
-    orderNumber: '40028922',
-    status: 'cancelado',
-    dateLabel: '01 janeiro',
-    createdAt: '01 janeiro 2026 - 12:32',
-    cancelledAt: '01 janeiro 2026 - 13:02',
-    total: '999,99',
-  },
-];
+const formatDateTime = (iso: string) => {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return `${date} - ${time}`;
+};
+
+const toOrderData = (order: ApiOrder): OrderData => ({
+  orderNumber: order.orderNumber,
+  status: order.status === 'DELIVERED' ? 'entregue' : order.status === 'CANCELLED' ? 'cancelado' : 'andamento',
+  dateLabel: new Date(order.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }),
+  createdAt: formatDateTime(order.createdAt),
+  deliveredAt: order.deliveredAt ? formatDateTime(order.deliveredAt) : undefined,
+  cancelledAt: order.cancelledAt ? formatDateTime(order.cancelledAt) : undefined,
+  total: Number(order.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+});
 
 function SadBagIllustration() {
   return (
@@ -96,6 +88,16 @@ function SadBagIllustration() {
 
 export default function Order() {
   const [activeTab, setActiveTab] = useState<Tab>('andamento');
+  const [orders, setOrders] = useState<OrderData[]>([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchOrders()
+      .then((data) => setOrders(data.map(toOrderData)))
+      .catch(() => setError('Não foi possível carregar os pedidos.'));
+  }, []);
+
+  const inProgress = orders.filter((o) => o.status === 'andamento');
 
   return (
     <div className="min-h-full bg-gray-100 px-4 py-5 flex flex-col">
@@ -131,10 +133,23 @@ export default function Order() {
         </button>
       </div>
 
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2 mb-3">{error}</p>
+      )}
+
       {activeTab === 'historico' ? (
         /* Order history list */
         <div className="flex flex-col gap-4 pb-4">
-          {sampleOrders.map((order, index) => (
+          {orders.map((order, index) => (
+            <OrderCard key={index} order={order} />
+          ))}
+          {orders.length === 0 && !error && (
+            <p className="text-sm text-gray-400 py-6 text-center">Você ainda não fez nenhum pedido.</p>
+          )}
+        </div>
+      ) : inProgress.length > 0 ? (
+        <div className="flex flex-col gap-4 pb-4">
+          {inProgress.map((order, index) => (
             <OrderCard key={index} order={order} />
           ))}
         </div>

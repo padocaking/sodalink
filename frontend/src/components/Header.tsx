@@ -29,9 +29,9 @@ export default function Header() {
             </button>
           </>
         )}
-        <button aria-label="Cart" className="w-6 h-6">
+        <Link to="/carrinho" aria-label="Cart" className="w-6 h-6">
           <img src={cartIcon} alt="Cart" className="w-full h-full" />
-        </button>
+        </Link>
       </div>
     </header>
   );
