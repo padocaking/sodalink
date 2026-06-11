@@ -6,12 +6,16 @@ const router = Router();
 // GET /api/products — List active products with optional filters
 router.get("/", async (req, res) => {
   try {
-    const { categoryId, search, featured } = req.query;
+    const { categoryId, categorySlug, search, featured } = req.query;
 
     const where: Record<string, unknown> = { isActive: true };
 
     if (categoryId) {
       where.categoryId = Number(categoryId);
+    }
+
+    if (categorySlug) {
+      where.category = { slug: String(categorySlug) };
     }
 
     if (search) {

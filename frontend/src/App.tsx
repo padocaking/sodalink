@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import Category from './pages/Category';
+import Categories from './pages/Categories';
 import Home from './pages/Home';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
@@ -10,6 +12,8 @@ import { getStoredUser, logout, type AuthUser } from './auth';
 
 function App() {
   const [user, setUser] = useState<AuthUser | null>(getStoredUser);
+  const location = useLocation();
+  const isCategoryPage = location.pathname.startsWith('/categoria');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -112,13 +116,15 @@ function App() {
           aria-label="Close menu"
         />
 
-        <Header />
+        {!isCategoryPage && <Header />}
 
         {/* Scrollable Main Content */}
         <div className="flex-1 overflow-y-auto pb-16 md:pb-0">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/pedido" element={<Order />} />
+            <Route path="/categoria/:slug" element={<Category />} />
+            <Route path="/categorias" element={<Categories />} />
             <Route path="/conta" element={<User user={user} onLogout={handleLogout} />} />
           </Routes>
         </div>
