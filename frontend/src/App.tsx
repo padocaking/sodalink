@@ -5,8 +5,11 @@ import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import Order from './pages/Order';
 import User from './pages/User';
+import Login from './pages/Login';
+import { getStoredUser, logout, type AuthUser } from './auth';
 
 function App() {
+  const [user, setUser] = useState<AuthUser | null>(getStoredUser);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -54,6 +57,16 @@ function App() {
     setIsDragging(false);
     setDragX(0);
   };
+
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+    setIsMenuOpen(false);
+  };
+
+  if (!user) {
+    return <Login onLogin={setUser} />;
+  }
 
   const menuW = typeof window !== 'undefined' ? window.innerWidth * 0.9 : 360;
   const overlayOpacity = isDragging
@@ -106,7 +119,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/pedido" element={<Order />} />
-            <Route path="/conta" element={<User />} />
+            <Route path="/conta" element={<User user={user} onLogout={handleLogout} />} />
           </Routes>
         </div>
 

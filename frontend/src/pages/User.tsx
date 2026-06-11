@@ -1,12 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-
-const userData = {
-  name: 'EMPRESA',
-  clientNumber: '319233674',
-  document: '312.654.123-48',
-  email: 'contato@empresa.com.br',
-  phone: '+55 (41) 992702020',
-};
+import type { AuthUser } from '../auth';
 
 const mi = (name: string) => (
   <span className="material-icons text-gray-500 text-[1.3rem]">{name}</span>
@@ -51,8 +44,9 @@ function AccountRow({ icon, label, onClick }: { icon: React.ReactNode; label: st
   );
 }
 
-export default function User() {
+export default function User({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
   const navigate = useNavigate();
+  const userData = user;
   return (
     <div className="min-h-full bg-gray-100 px-4 py-5 space-y-5">
 
@@ -109,7 +103,7 @@ export default function User() {
 
       {/* Footer */}
       <div className="pt-1 pb-4">
-        <button className="text-base font-bold underline text-gray-800 mb-1">Sair</button>
+        <button onClick={onLogout} className="text-base font-bold underline text-gray-800 mb-1">Sair</button>
         <p className="text-sm text-gray-400">Versão 0.0.1.000000</p>
       </div>
 
