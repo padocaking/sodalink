@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Header from './components/Header';
@@ -8,35 +8,99 @@ import User from './pages/User';
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragX, setDragX] = useState(0);
+
+  const startXRef = useRef(0);
+  const startYRef = useRef(0);
+  const directionRef = useRef<'h' | 'v' | null>(null);
+  const mouseDownRef = useRef(false);
+
+  const handlePointerStart = (clientX: number, clientY: number) => {
+    startXRef.current = clientX;
+    startYRef.current = clientY;
+    directionRef.current = null;
+  };
+
+  const handlePointerMove = (clientX: number, clientY: number) => {
+    const dx = clientX - startXRef.current;
+    const dy = clientY - startYRef.current;
+
+    if (!directionRef.current) {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+        directionRef.current = 'h';
+      } else if (Math.abs(dy) >= Math.abs(dx) && Math.abs(dy) > 10) {
+        directionRef.current = 'v';
+        return;
+      } else {
+        return;
+      }
+    }
+
+    if (directionRef.current === 'v') return;
+
+    const menuW = window.innerWidth * 0.9;
+    const base = isMenuOpen ? menuW : 0;
+    const x = Math.max(0, Math.min(menuW, base + dx));
+
+    setIsDragging(true);
+    setDragX(x);
+  };
+
+  const handlePointerEnd = () => {
+    if (!isDragging) return;
+    const menuW = window.innerWidth * 0.9;
+    setIsMenuOpen(dragX > menuW * 0.3);
+    setIsDragging(false);
+    setDragX(0);
+  };
+
+  const menuW = typeof window !== 'undefined' ? window.innerWidth * 0.9 : 360;
+  const overlayOpacity = isDragging
+    ? (dragX / menuW) * 0.6
+    : isMenuOpen ? 0.6 : 0;
 
   return (
-    <div className="relative w-full h-dvh overflow-hidden bg-gray-100 ">
+    <div
+      className="relative w-full h-dvh overflow-hidden bg-gray-100"
+      onTouchStart={(e) => handlePointerStart(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchMove={(e) => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchEnd={handlePointerEnd}
+      onMouseDown={(e) => { mouseDownRef.current = true; handlePointerStart(e.clientX, e.clientY); }}
+      onMouseMove={(e) => { if (mouseDownRef.current) handlePointerMove(e.clientX, e.clientY); }}
+      onMouseUp={() => { mouseDownRef.current = false; handlePointerEnd(); }}
+      onMouseLeave={() => { if (mouseDownRef.current) { mouseDownRef.current = false; handlePointerEnd(); } }}
+    >
 
-      {/* Side Menu Drawer - Positioned on the left, under the main content */}
-      <div className={`absolute top-0 left-0 w-[90vw] h-full bg-white z-0 `}>
+      {/* Side Menu Drawer */}
+      <div className="absolute top-0 left-0 w-[90vw] h-full bg-white z-0">
         <div className="p-6 h-full overflow-y-auto">
           <h2 className="text-2xl font-bold mb-6">Menu</h2>
-          {/* Add menu items here later */}
         </div>
       </div>
 
-      {/* Main Content Wrapper - Pushed right when menu opens */}
-      <div 
-        className={`relative z-10 transition-transform duration-300 ease-in-out h-full bg-white shadow-[-20px_0_30px_rgba(0,0,0,0.2)] flex flex-col ${
-          isMenuOpen ? 'translate-x-[90vw]' : 'translate-x-0'
-        }`}
+      {/* Main Content Wrapper */}
+      <div
+        className={`relative z-10 h-full bg-white shadow-[-20px_0_30px_rgba(0,0,0,0.2)] flex flex-col ${
+          isDragging ? '' : 'transition-transform duration-300 ease-in-out'
+        } ${!isDragging ? (isMenuOpen ? 'translate-x-[90vw]' : 'translate-x-0') : ''}`}
+        style={isDragging ? { transform: `translateX(${dragX}px)` } : undefined}
       >
-        {/* Overlay to close menu when clicking on the pushed content, also darkens the page */}
-        <div 
-          className={`absolute inset-0 z-50 bg-black/60 cursor-pointer transition-opacity duration-300 ${
-            isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        {/* Overlay */}
+        <div
+          className={`absolute inset-0 z-50 bg-black cursor-pointer ${
+            !isDragging ? 'transition-opacity duration-300' : ''
           }`}
-          onClick={() => setIsMenuOpen(false)} 
+          style={{
+            opacity: overlayOpacity,
+            pointerEvents: overlayOpacity > 0 ? 'auto' : 'none',
+          }}
+          onClick={() => setIsMenuOpen(false)}
           aria-label="Close menu"
         />
-        
+
         <Header />
-        
+
         {/* Scrollable Main Content */}
         <div className="flex-1 overflow-y-auto pb-16 md:pb-0">
           <Routes>
@@ -46,9 +110,9 @@ function App() {
           </Routes>
         </div>
 
-        <BottomNav 
-          onMenuClick={() => setIsMenuOpen(true)} 
-          isMenuOpen={isMenuOpen} 
+        <BottomNav
+          onMenuClick={() => setIsMenuOpen(true)}
+          isMenuOpen={isMenuOpen}
         />
       </div>
     </div>

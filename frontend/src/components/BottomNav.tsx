@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import HomeIcon from '../icons/home.svg?react';
-import TruckIcon from '../icons/truck.svg?react';
-import UserIcon from '../icons/user.svg?react';
-import MenuIcon from '../icons/menu.svg?react';
 
 interface BottomNavProps {
   onMenuClick: () => void;
@@ -39,24 +35,24 @@ export default function BottomNav({ onMenuClick, isMenuOpen }: BottomNavProps) {
 
       <div className="flex justify-around items-center py-3">
         <NavLink to="/" className={linkClass}>
-          <HomeIcon className="h-8 w-8" />
+          <span className="material-icons text-[28px]">home</span>
           <span className="text-[12px] font-medium tracking-wider">Início</span>
         </NavLink>
         <NavLink to="/pedido" className={linkClass}>
-          <TruckIcon className="h-9 w-9" />
+          <span className="material-icons text-[28px]">local_shipping</span>
           <span className="text-[12px] font-medium tracking-wider">Pedidos</span>
         </NavLink>
         <NavLink to="/conta" className={linkClass}>
-          <UserIcon className="h-8 w-8 mb-1" />
+          <span className="material-icons text-[28px]">person</span>
           <span className="text-[12px] font-medium tracking-wider">Conta</span>
         </NavLink>
-        <button 
+        <button
           onClick={onMenuClick}
           className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
             isMenuOpen ? 'text-red-600' : 'text-black hover:text-red-600'
           }`}
         >
-          <MenuIcon className="h-8 w-8 mb-1" />
+          <span className="material-icons text-[28px]">menu</span>
           <span className="text-[12px] font-medium tracking-wider">Menu</span>
         </button>
       </div>
