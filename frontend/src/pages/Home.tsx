@@ -83,19 +83,37 @@ export default function Home() {
     <div className="flex flex-col min-h-full bg-gray-100">
       <style>{`
         @keyframes popIn {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+            max-height: 0;
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+            max-height: 15rem; /* Generous max-height */
+          }
         }
         @keyframes popOut {
-          from { opacity: 1; transform: scale(1); }
-          to { opacity: 0; transform: scale(0.9); }
+          from {
+            opacity: 1;
+            transform: scale(1);
+            max-height: 15rem; /* Generous max-height */
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.9);
+            max-height: 0;
+          }
         }
         .animate-pop-in {
           animation: popIn 0.3s ease-out forwards;
           opacity: 0;
+          overflow: hidden;
         }
         .animate-pop-out {
           animation: popOut 0.3s ease-in forwards;
+          overflow: hidden;
         }
         .no-scrollbar::-webkit-scrollbar {
           display: none;
