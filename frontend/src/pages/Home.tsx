@@ -7,13 +7,27 @@ const tileColors = [
   'bg-red-300', 'bg-green-300', 'bg-yellow-200', 'bg-blue-200', 'bg-orange-200', 'bg-purple-200',
 ];
 
-function CategoryTile({ label, to, children }: { label: string; to: string; children: React.ReactNode }) {
-  return (
-    <Link to={to} className="flex flex-col items-center gap-2">
+function CategoryTile({ label, to, onClick, children }: { label: string; to?: string; onClick?: () => void; children: React.ReactNode }) {
+  const content = (
+    <>
       <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-sm flex items-center justify-center">
         {children}
       </div>
       <span className="text-sm font-medium text-gray-800 text-center">{label}</span>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button onClick={onClick} className="flex flex-col items-center gap-2 cursor-pointer">
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to ?? '#'} className="flex flex-col items-center gap-2 cursor-pointer">
+      {content}
     </Link>
   );
 }
@@ -49,6 +63,7 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [promos, setPromos] = useState<Product[]>([]);
   const [error, setError] = useState('');
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   useEffect(() => {
     Promise.all([fetchCategories(), fetchProducts({ featured: true })])
@@ -94,7 +109,7 @@ export default function Home() {
               <span className="material-icons text-white text-4xl">new_releases</span>
             </div>
           </CategoryTile>
-          {categories.slice(0, 3).map((cat, i) => (
+          {categories.slice(0, showAllCategories ? categories.length : 3).map((cat, i) => (
             <CategoryTile key={cat.id} label={cat.name} to={`/categoria/${cat.slug}`}>
               {cat.imageUrl ? (
                 <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover" />
@@ -103,11 +118,19 @@ export default function Home() {
               )}
             </CategoryTile>
           ))}
-          <CategoryTile label="Veja mais" to="/categorias">
-            <div className="w-full h-full bg-white flex items-center justify-center">
-              <span className="material-icons text-green-500 text-4xl">add</span>
-            </div>
-          </CategoryTile>
+          {!showAllCategories ? (
+            <CategoryTile label="Veja mais" onClick={() => setShowAllCategories(true)}>
+              <div className="w-full h-full bg-white flex items-center justify-center">
+                <span className="material-icons text-green-500 text-4xl">add</span>
+              </div>
+            </CategoryTile>
+          ) : (
+            <CategoryTile label="Veja menos" onClick={() => setShowAllCategories(false)}>
+              <div className="w-full h-full bg-white flex items-center justify-center">
+                <span className="material-icons text-red-500 text-4xl">remove</span>
+              </div>
+            </CategoryTile>
+          )}
         </div>
       </section>
 
