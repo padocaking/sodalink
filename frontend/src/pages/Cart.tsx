@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { clearCart, createOrder, fetchCart, formatPrice, setCartItem, type CartItem } from '../api';
 import Header from '../components/Header';
 
-function CartRow({ item, onQtyChange }: { item: CartItem; onQtyChange: (qty: number) => Promise<void> }) {
+function CartRow({ item, onQtyChange }: { item: CartItem & { isRemoving?: boolean }; onQtyChange: (qty: number) => Promise<void> }) {
   const { product, quantity } = item;
   const [reais, centavos] = Number(product.price).toFixed(2).split('.');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -15,7 +15,7 @@ function CartRow({ item, onQtyChange }: { item: CartItem; onQtyChange: (qty: num
   };
 
   return (
-    <div className="py-4 border-b border-gray-100 last:border-0">
+    <div className={`py-4 border-b border-gray-100 last:border-0 ${item.isRemoving ? 'animate-pop-out' : ''}`}>
       <div className="flex items-start gap-3">
         <Link to={`/produto/${product.slug}`} className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center shrink-0">
           {product.imageUrl ? (
@@ -80,7 +80,7 @@ function CartRow({ item, onQtyChange }: { item: CartItem; onQtyChange: (qty: num
 
 export default function Cart() {
   const navigate = useNavigate();
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<(CartItem & { isRemoving?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -92,24 +92,50 @@ export default function Cart() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleQtyChange = (item: CartItem, qty: number) => {
-    setItems((prev) =>
-      qty <= 0
-        ? prev.filter((i) => i.id !== item.id)
-        : prev.map((i) => (i.id === item.id ? { ...i, quantity: qty } : i))
-    );
-    return setCartItem(item.productId, Math.max(0, qty))
-      .then(() => { window.dispatchEvent(new Event('cart-updated')); })
-      .catch(() => {
-        setError('Não foi possível atualizar o item.');
-      });
+  const handleQtyChange = (item: CartItem, qty: number): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const newQty = Math.max(0, qty);
+      const originalItems = items;
+
+      if (newQty === 0) {
+        setItems(prev => prev.map(i => i.id === item.id ? { ...i, isRemoving: true } : i));
+      } else {
+        setItems(prev => prev.map(i => (i.id === item.id ? { ...i, quantity: newQty } : i)));
+      }
+
+      setCartItem(item.productId, newQty)
+        .then(() => {
+          if (newQty === 0) {
+            setTimeout(() => {
+              setItems(prev => prev.filter(i => i.id !== item.id));
+              window.dispatchEvent(new Event('cart-updated'));
+              resolve();
+            }, 300); // Animation duration
+          } else {
+            window.dispatchEvent(new Event('cart-updated'));
+            resolve();
+          }
+        })
+        .catch((err) => {
+          setError('Não foi possível atualizar o carrinho.');
+          setItems(originalItems);
+          reject(err);
+        });
+    });
   };
 
   const handleClear = () => {
-    setItems([]);
+    const originalItems = items;
+    setItems(prev => prev.map(i => ({ ...i, isRemoving: true })));
     clearCart()
-      .then(() => window.dispatchEvent(new Event('cart-updated')))
-      .catch(() => setError('Não foi possível esvaziar o carrinho.'));
+      .then(() => setTimeout(() => {
+        setItems([]);
+        window.dispatchEvent(new Event('cart-updated'));
+      }, 300))
+      .catch(() => {
+        setError('Não foi possível esvaziar o carrinho.');
+        setItems(originalItems);
+      });
   };
 
   const handleCheckout = async () => {
@@ -128,15 +154,40 @@ export default function Cart() {
 
   return (
     <div className="min-h-full bg-gray-100 flex flex-col">
+      <style>{`
+        @keyframes popOut {
+          from {
+            opacity: 1;
+            transform: scale(1);
+            max-height: 15rem; /* Generous max-height, larger than any cart item */
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.9);
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin: 0;
+            border-width: 0;
+          }
+        }
+        .animate-pop-out {
+          animation: popOut 0.3s ease-out forwards;
+          overflow: hidden;
+        }
+      `}</style>
+
       {/* Top bar */}
       <Header title="Carrinho" showBack hideSearch hideCart />
 
       <div className="px-4 py-4 flex-1 pb-28">
-        <p className="text-base text-gray-900 mb-4">
-          <span className="font-semibold">Carrinho</span>
-          {' - '}
-          <span className="text-gray-500">Você tem {items.length} produtos</span>
-        </p>
+        {!loading && items.length > 0 && (
+          <p className="text-base text-gray-900 mb-4">
+            <span className="font-semibold">Carrinho</span>
+            {' - '}
+            <span className="text-gray-500">Você tem {items.length} produtos</span>
+          </p>
+        )}
 
         {error && (
           <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2 mb-3">{error}</p>
@@ -145,7 +196,16 @@ export default function Cart() {
         {loading ? (
           <p className="text-sm text-gray-400 py-6 text-center">Carregando carrinho...</p>
         ) : items.length === 0 ? (
-          <p className="text-sm text-gray-400 py-6 text-center">Seu carrinho está vazio.</p>
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <span className="material-icons text-gray-300 mb-4" style={{ fontSize: '6rem' }}>remove_shopping_cart</span>
+            <p className="text-lg text-gray-600 mb-8 font-medium">Seu carrinho está vazio.</p>
+            <Link
+              to="/"
+              className="w-[80%] max-w-xs bg-red-600 text-white text-base font-semibold py-3.5 rounded-full shadow-sm active:scale-[0.98] transition"
+            >
+              Encontrar itens
+            </Link>
+          </div>
         ) : (
           <div className="bg-white rounded-2xl shadow-sm px-4">
             {items.map((item) => (
