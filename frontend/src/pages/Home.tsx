@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BannerSlider from '../components/BannerSlider';
-import { fetchCategories, fetchProducts, formatPrice, type Category, type Product } from '../api';
+import ProductCard from '../components/ProductCard';
+import { fetchCategories, fetchProducts, formatPrice, fetchFavorites, fetchCart, type Category, type Product, type CartItem } from '../api';
 
 const tileColors = [
   'bg-red-300', 'bg-green-300', 'bg-yellow-200', 'bg-blue-200', 'bg-orange-200', 'bg-purple-200',
@@ -39,45 +40,32 @@ function CategoryTile({
   );
 }
 
-function PromoCard({ product }: { product: Product }) {
-  return (
-    <Link
-      to={`/produto/${product.slug}`}
-      className="min-w-44 bg-white rounded-2xl shadow-sm overflow-hidden shrink-0"
-    >
-      <div className="relative h-28 bg-gray-100 flex items-center justify-center">
-        {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
-        ) : (
-          <span className="material-icons text-gray-300 text-5xl">local_drink</span>
-        )}
-        <span className="absolute top-2 left-0 bg-red-600 text-white text-xs font-bold px-3 py-0.5 rounded-r-full">
-          Promoção
-        </span>
-      </div>
-      <div className="p-3">
-        <p className="text-sm font-medium text-gray-800 line-clamp-2">{product.name}</p>
-        {product.comparePrice && (
-          <p className="text-xs text-gray-400 line-through">{formatPrice(product.comparePrice)}</p>
-        )}
-        <p className="text-base font-bold text-gray-900">{formatPrice(product.price)}</p>
-      </div>
-    </Link>
-  );
-}
-
 export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [promos, setPromos] = useState<Product[]>([]);
   const [error, setError] = useState('');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [recommendations, setRecommendations] = useState<Product[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
+  const [cartQty, setCartQty] = useState<Map<number, number>>(new Map());
 
   useEffect(() => {
-    Promise.all([fetchCategories(), fetchProducts({ featured: true })])
-      .then(([cats, featured]) => {
+    Promise.all([
+      fetchCategories(),
+      fetchProducts({ featured: true }),
+      fetchProducts(),
+      fetchFavorites().catch(() => [] as Product[]),
+      fetchCart().catch(() => [] as CartItem[]),
+    ])
+      .then(([cats, featured, allProds, favs, cart]) => {
         setCategories(cats);
         setPromos(featured);
+        // Shuffle all products to get random recommendations
+        const shuffled = [...allProds].sort(() => 0.5 - Math.random());
+        setRecommendations(shuffled.slice(0, 10));
+        setFavoriteIds(new Set(favs.map((f) => f.id)));
+        setCartQty(new Map(cart.map((c) => [c.productId, c.quantity])));
       })
       .catch(() => setError('Não foi possível carregar os dados. Verifique a API.'));
   }, []);
@@ -133,7 +121,7 @@ export default function Home() {
       <section className="px-4 mt-5">
         <h2 className="text-xl font-bold text-gray-900 mb-3">Categorias</h2>
         <div className="grid grid-cols-3 gap-4">
-          <CategoryTile label="Promoções" to="/">
+          <CategoryTile label="Promoções" to="/categoria/promocoes">
             <div className="w-full h-full bg-red-400 flex items-center justify-center">
               <span className="material-icons text-white text-4xl">sell</span>
             </div>
@@ -189,13 +177,38 @@ export default function Home() {
       <section className="px-4 mt-6 pb-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl font-bold text-gray-900">Promoções</h2>
-          <button className="text-sm text-gray-500 underline">Ver todos &rsaquo;</button>
+          <Link to="/categoria/promocoes" className="text-sm text-gray-500 underline">Ver todos &rsaquo;</Link>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
-          {promos.map((p) => <PromoCard key={p.id} product={p} />)}
+          {promos.map((p) => (
+            <div key={p.id} className="min-w-44 shrink-0">
+              <ProductCard
+                product={p}
+                favorited={favoriteIds.has(p.id)}
+                initialQty={cartQty.get(p.id) ?? 0}
+                isPromo
+              />
+            </div>
+          ))}
           {!error && promos.length === 0 && (
             <p className="text-sm text-gray-400 py-4">Nenhuma promoção no momento.</p>
           )}
+        </div>
+      </section>
+
+      {/* Recomendações */}
+      <section className="px-4 mt-2 pb-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-3">Recomendações</h2>
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
+          {recommendations.map((p) => (
+            <div key={p.id} className="min-w-44 shrink-0">
+              <ProductCard
+                product={p}
+                favorited={favoriteIds.has(p.id)}
+                initialQty={cartQty.get(p.id) ?? 0}
+              />
+            </div>
+          ))}
         </div>
       </section>
     </div>

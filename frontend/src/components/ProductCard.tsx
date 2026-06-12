@@ -9,9 +9,10 @@ interface Props {
   onFavoriteChange?: (favorited: boolean) => void;
   showStepper?: boolean;
   initialQty?: number;
+  isPromo?: boolean;
 }
 
-export default function ProductCard({ product, favorited, onFavoriteChange, showStepper = true, initialQty = 0 }: Props) {
+export default function ProductCard({ product, favorited, onFavoriteChange, showStepper = true, initialQty = 0, isPromo }: Props) {
   const [qty, setQty] = useState(initialQty);
 
   const changeQty = (next: number) => {
@@ -24,6 +25,11 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
   return (
     <div className="bg-white rounded-2xl shadow-sm p-3 flex flex-col">
       <div className="relative h-32 bg-gray-50 rounded-xl mb-2">
+        {isPromo && (
+          <span className="absolute top-2 -left-3 bg-red-600 text-white text-xs font-bold px-3 py-0.5 rounded-r-full z-10">
+            Promoções
+          </span>
+        )}
         <Link to={`/produto/${product.slug}`} className="h-full w-full flex items-center justify-center">
           {product.imageUrl ? (
             <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain" />
@@ -45,11 +51,12 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
         <p className="text-xl font-extrabold text-gray-900 leading-tight">
           R$ {reais}<sup className="text-xs">,{centavos}</sup>
         </p>
-        <p className="text-[0.65rem] text-gray-500">
-          ({formatPrice(product.price)} preço por unidade)
-        </p>
-        {product.comparePrice && (
-          <p className="text-xs text-gray-400 line-through">{formatPrice(product.comparePrice)}</p>
+        {product.comparePrice ? (
+          <p className="text-[0.65rem] text-gray-400 line-through">{formatPrice(product.comparePrice)}</p>
+        ) : (
+          <p className="text-[0.65rem] text-gray-500">
+            ({formatPrice(product.price)} preço por unidade)
+          </p>
         )}
       </Link>
 

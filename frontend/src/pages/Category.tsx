@@ -15,8 +15,9 @@ export default function Category() {
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
+    const isPromos = slug === 'promocoes';
     Promise.all([
-      fetchProducts({ categorySlug: slug }),
+      fetchProducts(isPromos ? { featured: true } : { categorySlug: slug }),
       fetchFavorites().catch(() => [] as Product[]),
       fetchCart().catch(() => [] as CartItem[]),
     ])
@@ -29,7 +30,9 @@ export default function Category() {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  const categoryName = products[0]?.category.name
+  const categoryName = slug === 'promocoes'
+    ? 'Promoções'
+    : products[0]?.category.name
     ?? (slug ?? '').replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
   return (
@@ -71,6 +74,7 @@ export default function Category() {
                   product={p}
                   favorited={favoriteIds.has(p.id)}
                   initialQty={cartQty.get(p.id) ?? 0}
+                isPromo={slug === 'promocoes'}
                 />
               ))}
             </div>
