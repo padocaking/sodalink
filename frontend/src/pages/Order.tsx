@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import OrderCard from '../components/OrderCard';
 import type { OrderData } from '../components/OrderCard';
 import { fetchOrders, type Order as ApiOrder } from '../api';
@@ -88,8 +88,14 @@ function SadBagIllustration() {
 
 export default function Order() {
   const [activeTab, setActiveTab] = useState<Tab>('andamento');
+  const [dragX, setDragX] = useState(0);
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [error, setError] = useState('');
+  
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const isDragging = useRef(false);
+  const dragDirection = useRef<'h' | 'v' | null>(null);
 
   useEffect(() => {
     fetchOrders()
@@ -97,11 +103,60 @@ export default function Order() {
       .catch(() => setError('Não foi possível carregar os pedidos.'));
   }, []);
 
+  const changeTab = (tab: Tab) => {
+    setActiveTab(tab);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isDragging.current = true;
+    dragDirection.current = null;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+
+    // Define direction on first significant movement
+    if (!dragDirection.current) {
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+        dragDirection.current = 'h';
+      } else if (Math.abs(dy) >= Math.abs(dx) && Math.abs(dy) > 10) {
+        dragDirection.current = 'v';
+        isDragging.current = false;
+        return;
+      } else {
+        return; // Wait until direction is clear
+      }
+    }
+
+    if (dragDirection.current === 'h') {
+      let newDragX = dx;
+      // Add resistance to the edges
+      if (activeTab === 'andamento' && dx > 0) newDragX = dx * 0.3;
+      else if (activeTab === 'historico' && dx < 0) newDragX = dx * 0.3;
+      setDragX(newDragX);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isDragging.current && dragDirection.current === 'h') {
+      const threshold = window.innerWidth * 0.25;
+      if (dragX < -threshold && activeTab === 'andamento') changeTab('historico');
+      else if (dragX > threshold && activeTab === 'historico') changeTab('andamento');
+    }
+    isDragging.current = false;
+    dragDirection.current = null;
+    setDragX(0);
+  };
+
   const inProgress = orders.filter((o) => o.status === 'andamento');
+  const historyOrders = orders.filter((o) => o.status !== 'andamento');
 
   return (
-    <div className="min-h-full bg-gray-100 px-4 py-5 flex flex-col">
-
+    <div className="min-h-full bg-gray-100 px-4 py-5 flex flex-col overflow-x-hidden">
       {/* Tabs */}
       <div className="relative flex bg-gray-200 rounded-full mb-6 p-1">
         {/* Sliding indicator */}
@@ -110,7 +165,7 @@ export default function Order() {
           style={{ left: activeTab === 'andamento' ? '4px' : 'calc(50% + 0px)' }}
         />
         <button
-          onClick={() => setActiveTab('andamento')}
+          onClick={() => changeTab('andamento')}
           className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors duration-300 rounded-full ${
             activeTab === 'andamento'
               ? 'text-white'
@@ -121,7 +176,7 @@ export default function Order() {
           Em andamento
         </button>
         <button
-          onClick={() => setActiveTab('historico')}
+          onClick={() => changeTab('historico')}
           className={`relative z-10 flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors duration-300 rounded-full ${
             activeTab === 'historico'
               ? 'text-white'
@@ -137,39 +192,56 @@ export default function Order() {
         <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2 mb-3">{error}</p>
       )}
 
-      {activeTab === 'historico' ? (
-        /* Order history list */
-        <div className="flex flex-col gap-4 pb-4">
-          {orders.map((order, index) => (
-            <OrderCard key={index} order={order} />
-          ))}
-          {orders.length === 0 && !error && (
-            <p className="text-sm text-gray-400 py-6 text-center">Você ainda não fez nenhum pedido.</p>
-          )}
-        </div>
-      ) : inProgress.length > 0 ? (
-        <div className="flex flex-col gap-4 pb-4">
-          {inProgress.map((order, index) => (
-            <OrderCard key={index} order={order} />
-          ))}
-        </div>
-      ) : (
-        /* Empty state */
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-4 pb-10">
-          <p className="text-gray-500 text-sm mb-6">
-            Você não tem nenhum pedido em entrega
-          </p>
+      <div 
+        className="flex-1 relative" 
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div 
+          className={`flex gap-4 ${dragX === 0 ? 'transition-transform duration-300 ease-out' : ''}`}
+          style={{ 
+            width: 'calc(200% + 1rem)',
+            transform: `translateX(calc(${activeTab === 'andamento' ? '0px' : 'calc(-50% - 0.5rem)'} + ${dragX}px))` 
+          }}
+        >
+          {/* Andamento panel */}
+          <div className="shrink-0 flex flex-col" style={{ width: 'calc(50% - 0.5rem)' }}>
+            {inProgress.length > 0 ? (
+              <div className="flex flex-col gap-4 pb-4">
+                {inProgress.map((order, index) => (
+                  <OrderCard key={index} order={order} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-4 pb-10">
+                <p className="text-gray-500 text-sm mb-6">
+                  Você não tem nenhum pedido em entrega
+                </p>
+                <SadBagIllustration />
+                <button
+                  onClick={() => window.history.back()}
+                  className="mt-8 bg-red-600 text-white font-semibold py-3 rounded-full w-[60%] text-sm hover:bg-red-700 transition-colors"
+                >
+                  ← Voltar
+                </button>
+              </div>
+            )}
+          </div>
 
-          <SadBagIllustration />
-
-          <button
-            onClick={() => window.history.back()}
-            className="mt-8 bg-red-600 text-white font-semibold py-3 rounded-full w-[60%] text-sm hover:bg-red-700 transition-colors"
-          >
-            ← Voltar
-          </button>
+          {/* Histórico panel */}
+          <div className="shrink-0 flex flex-col" style={{ width: 'calc(50% - 0.5rem)' }}>
+            <div className="flex flex-col gap-4 pb-4">
+              {historyOrders.map((order, index) => (
+                <OrderCard key={index} order={order} />
+              ))}
+              {historyOrders.length === 0 && !error && (
+                <p className="text-sm text-gray-400 py-6 text-center">Você ainda não fez nenhum pedido.</p>
+              )}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
 
     </div>
   );
