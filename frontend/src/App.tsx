@@ -26,7 +26,7 @@ function App() {
 
   const startXRef = useRef(0);
   const startYRef = useRef(0);
-  const directionRef = useRef<'h' | 'v' | null>(null);
+  const directionRef = useRef<'h' | 'v' | 'ignore' | null>(null);
   const mouseDownRef = useRef(false);
 
   const handlePointerStart = (clientX: number, clientY: number) => {
@@ -41,6 +41,10 @@ function App() {
 
     if (!directionRef.current) {
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+        if (!isMenuOpen && startXRef.current > 40) {
+          directionRef.current = 'ignore';
+          return;
+        }
         directionRef.current = 'h';
       } else if (Math.abs(dy) >= Math.abs(dx) && Math.abs(dy) > 10) {
         directionRef.current = 'v';
@@ -50,7 +54,7 @@ function App() {
       }
     }
 
-    if (directionRef.current === 'v') return;
+    if (directionRef.current === 'v' || directionRef.current === 'ignore') return;
 
     const menuW = window.innerWidth * 0.9;
     const base = isMenuOpen ? menuW : 0;
