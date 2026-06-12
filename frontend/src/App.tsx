@@ -9,6 +9,7 @@ import OrderSuccess from './pages/OrderSuccess';
 import Home from './pages/Home';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
+import Menu from './components/Menu';
 import Order from './pages/Order';
 import User from './pages/User';
 import Login from './pages/Login';
@@ -101,14 +102,12 @@ function App() {
 
       {/* Side Menu Drawer */}
       <div className="absolute top-0 left-0 w-[90vw] h-full bg-white z-0">
-        <div className="p-6 h-full overflow-y-auto">
-          <h2 className="text-2xl font-bold mb-6">Menu</h2>
-        </div>
+        <Menu onClose={() => setIsMenuOpen(false)} />
       </div>
 
       {/* Main Content Wrapper */}
       <div
-        className={`relative z-10 h-full bg-white shadow-[-20px_0_30px_rgba(0,0,0,0.2)] flex flex-col ${
+        className={`relative z-10 h-full bg-white flex flex-col ${
           isDragging ? '' : 'transition-transform duration-300 ease-in-out'
         } ${!isDragging ? (isMenuOpen ? 'translate-x-[90vw]' : 'translate-x-0') : ''}`}
         style={isDragging ? { transform: `translateX(${dragX}px)` } : undefined}

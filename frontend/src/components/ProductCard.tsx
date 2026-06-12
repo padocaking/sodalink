@@ -14,10 +14,19 @@ interface Props {
 
 export default function ProductCard({ product, favorited, onFavoriteChange, showStepper = true, initialQty = 0, isPromo }: Props) {
   const [qty, setQty] = useState(initialQty);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const changeQty = (next: number) => {
+  const changeQty = (delta: number) => {
+    if (isUpdating) return;
+    setIsUpdating(true);
+
+    const next = Math.max(0, qty + delta);
     setQty(next);
-    setCartItem(product.id, next).catch(() => setQty(qty));
+
+    setCartItem(product.id, next)
+      .then(() => window.dispatchEvent(new Event('cart-updated')))
+      .catch(() => setQty(qty))
+      .finally(() => setTimeout(() => setIsUpdating(false), 100));
   };
 
   const [reais, centavos] = Number(product.price).toFixed(2).split('.');
@@ -69,16 +78,18 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
       <div className="mt-3 flex items-center justify-between bg-gray-50 rounded-full px-1 py-1">
         <button
           aria-label="Diminuir"
-          onClick={() => changeQty(Math.max(0, qty - 1))}
-          className={`w-7 h-7 rounded-full flex items-center justify-center text-white ${qty > 0 ? 'bg-red-600' : 'bg-gray-300'}`}
+          disabled={isUpdating}
+          onClick={(e) => { e.preventDefault(); changeQty(-1); }}
+          className={`w-7 h-7 rounded-full flex items-center justify-center text-white ${qty > 0 ? 'bg-red-600' : 'bg-gray-300'} ${isUpdating ? 'opacity-50' : ''}`}
         >
           <span className="material-icons text-[1.1rem]">remove</span>
         </button>
         <span className="text-sm font-semibold text-gray-800">{qty}</span>
         <button
           aria-label="Aumentar"
-          onClick={() => changeQty(qty + 1)}
-          className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-white"
+          disabled={isUpdating}
+          onClick={(e) => { e.preventDefault(); changeQty(1); }}
+          className={`w-7 h-7 rounded-full bg-green-500 flex items-center justify-center text-white ${isUpdating ? 'opacity-50' : ''}`}
         >
           <span className="material-icons text-[1.1rem]">add</span>
         </button>

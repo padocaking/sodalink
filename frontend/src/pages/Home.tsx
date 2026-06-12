@@ -97,6 +97,13 @@ export default function Home() {
         .animate-pop-out {
           animation: popOut 0.3s ease-in forwards;
         }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
       `}</style>
       {/* Promo strip */}
       <div className="bg-blue-500 text-white px-4 py-2.5 flex items-center justify-between gap-3">
@@ -107,7 +114,7 @@ export default function Home() {
             <p className="text-xs text-blue-100 leading-tight">Descubra as últimas ofertas que temos para você.</p>
           </div>
         </div>
-        <button className="text-xs underline shrink-0">Veja mais</button>
+        <Link to="/categoria/promocoes" className="text-xs underline shrink-0">Veja mais</Link>
       </div>
 
       {/* Banner Slider Section */}
@@ -179,7 +186,7 @@ export default function Home() {
           <h2 className="text-xl font-bold text-gray-900">Promoções</h2>
           <Link to="/categoria/promocoes" className="text-sm text-gray-500 underline">Ver todos &rsaquo;</Link>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
           {promos.map((p) => (
             <div key={p.id} className="min-w-44 shrink-0">
               <ProductCard
@@ -199,7 +206,7 @@ export default function Home() {
       {/* Recomendações */}
       <section className="px-4 mt-2 pb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-3">Recomendações</h2>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
           {recommendations.map((p) => (
             <div key={p.id} className="min-w-44 shrink-0">
               <ProductCard
