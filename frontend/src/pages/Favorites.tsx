@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchFavorites, type Product } from '../api';
 import ProductCard from '../components/ProductCard';
+import Header from '../components/Header';
 
 export default function Favorites() {
   const navigate = useNavigate();
@@ -23,15 +24,7 @@ export default function Favorites() {
   return (
     <div className="min-h-full bg-gray-100 flex flex-col">
       {/* Top bar */}
-      <header className="bg-white px-4 py-4 flex items-center gap-3 border-b border-gray-200 sticky top-0 z-20">
-        <button aria-label="Voltar" onClick={() => navigate(-1)}>
-          <span className="material-icons text-gray-800">arrow_back_ios_new</span>
-        </button>
-        <h1 className="flex-1 text-2xl font-semibold text-gray-900">Favoritos</h1>
-        <Link to="/carrinho" aria-label="Carrinho">
-          <span className="material-icons text-gray-800">shopping_cart</span>
-        </Link>
-      </header>
+      <Header title="Favoritos" showBack hideFavorites hideSearch />
 
       <div className="px-4 py-4 flex-1">
         <p className="text-base text-gray-900 mb-4">
