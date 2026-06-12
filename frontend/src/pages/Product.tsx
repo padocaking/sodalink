@@ -34,7 +34,9 @@ export default function Product() {
   const changeQty = (next: number) => {
     if (!product) return;
     setQty(next);
-    setCartItem(product.id, next).catch(() => setQty(qty));
+    setCartItem(product.id, next)
+      .then(() => window.dispatchEvent(new Event('cart-updated')))
+      .catch(() => setQty(qty));
   };
 
   const [reais, centavos] = product

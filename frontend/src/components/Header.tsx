@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { fetchCart } from '../api';
 
 interface HeaderProps {
   title?: string;
@@ -12,6 +14,23 @@ export default function Header({ title, showBack, hideFavorites, hideSearch, hid
   const location = useLocation();
   const navigate = useNavigate();
   const isOrderPage = location.pathname.startsWith('/pedido');
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    if (hideCart) return;
+
+    const updateCart = () => {
+      fetchCart()
+        .then((items) => {
+          setCartCount(items.length);
+        })
+        .catch(() => {});
+    };
+
+    updateCart();
+    window.addEventListener('cart-updated', updateCart);
+    return () => window.removeEventListener('cart-updated', updateCart);
+  }, [hideCart, location]);
 
   return (
     <header className={`bg-white flex items-center border-b border-gray-200 h-20 px-7 ${showBack ? 'gap-3 sticky top-0 z-20' : 'justify-between'}`}>
@@ -43,8 +62,13 @@ export default function Header({ title, showBack, hideFavorites, hideSearch, hid
           </button>
         )}
         {!hideCart && (
-          <Link to="/carrinho" aria-label="Cart" className="p-2 -m-2 cursor-pointer">
+          <Link to="/carrinho" aria-label="Cart" className="relative p-2 -m-2 cursor-pointer flex items-center justify-center">
             <span className="material-icons text-gray-800 text-[32px]">shopping_cart</span>
+            {cartCount > 0 && (
+              <span className="absolute top-1 right-0 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
           </Link>
         )}
       </div>
