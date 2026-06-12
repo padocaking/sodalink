@@ -7,7 +7,14 @@ const tileColors = [
   'bg-red-300', 'bg-green-300', 'bg-yellow-200', 'bg-blue-200', 'bg-orange-200', 'bg-purple-200',
 ];
 
-function CategoryTile({ label, to, onClick, children }: { label: string; to?: string; onClick?: () => void; children: React.ReactNode }) {
+function CategoryTile({
+  label,
+  to,
+  onClick,
+  children,
+  className = '',
+  style,
+}: { label: string; to?: string; onClick?: () => void; children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   const content = (
     <>
       <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-sm flex items-center justify-center">
@@ -19,14 +26,14 @@ function CategoryTile({ label, to, onClick, children }: { label: string; to?: st
 
   if (onClick) {
     return (
-      <button onClick={onClick} className="flex flex-col items-center gap-2 cursor-pointer">
+      <button onClick={onClick} className={`flex flex-col items-center gap-2 cursor-pointer ${className}`} style={style}>
         {content}
       </button>
     );
   }
 
   return (
-    <Link to={to ?? '#'} className="flex flex-col items-center gap-2 cursor-pointer">
+    <Link to={to ?? '#'} className={`flex flex-col items-center gap-2 cursor-pointer ${className}`} style={style}>
       {content}
     </Link>
   );
@@ -64,6 +71,7 @@ export default function Home() {
   const [promos, setPromos] = useState<Product[]>([]);
   const [error, setError] = useState('');
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     Promise.all([fetchCategories(), fetchProducts({ featured: true })])
@@ -74,8 +82,34 @@ export default function Home() {
       .catch(() => setError('Não foi possível carregar os dados. Verifique a API.'));
   }, []);
 
+  const handleVejaMenos = () => {
+    setIsClosing(true);
+    const maxDelay = 300 + Math.max(0, categories.length - 3) * 50; // 300ms base animation + 50ms stagger
+    setTimeout(() => {
+      setShowAllCategories(false);
+      setIsClosing(false);
+    }, maxDelay);
+  };
+
   return (
     <div className="flex flex-col min-h-full bg-gray-100">
+      <style>{`
+        @keyframes popIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes popOut {
+          from { opacity: 1; transform: scale(1); }
+          to { opacity: 0; transform: scale(0.9); }
+        }
+        .animate-pop-in {
+          animation: popIn 0.3s ease-out forwards;
+          opacity: 0;
+        }
+        .animate-pop-out {
+          animation: popOut 0.3s ease-in forwards;
+        }
+      `}</style>
       {/* Promo strip */}
       <div className="bg-blue-500 text-white px-4 py-2.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -109,15 +143,27 @@ export default function Home() {
               <span className="material-icons text-white text-4xl">new_releases</span>
             </div>
           </CategoryTile>
-          {categories.slice(0, showAllCategories ? categories.length : 3).map((cat, i) => (
-            <CategoryTile key={cat.id} label={cat.name} to={`/categoria/${cat.slug}`}>
+          {categories.slice(0, showAllCategories ? categories.length : 3).map((cat, i) => {
+            const isExtra = i >= 3;
+            const delay = isClosing 
+              ? `${(categories.length - 1 - i) * 0.05}s` // reverse stagger out
+              : `${(i - 3) * 0.05}s`; // stagger in
+            return (
+              <CategoryTile 
+                key={cat.id} 
+                label={cat.name} 
+                to={`/categoria/${cat.slug}`}
+                className={isExtra ? (isClosing ? 'animate-pop-out' : 'animate-pop-in') : ''}
+                style={isExtra ? { animationDelay: delay } : undefined}
+              >
               {cat.imageUrl ? (
                 <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover" />
               ) : (
                 <div className={`w-full h-full ${tileColors[i % tileColors.length]}`} />
               )}
             </CategoryTile>
-          ))}
+            );
+          })}
           {!showAllCategories ? (
             <CategoryTile label="Veja mais" onClick={() => setShowAllCategories(true)}>
               <div className="w-full h-full bg-white flex items-center justify-center">
@@ -125,7 +171,12 @@ export default function Home() {
               </div>
             </CategoryTile>
           ) : (
-            <CategoryTile label="Veja menos" onClick={() => setShowAllCategories(false)}>
+            <CategoryTile 
+              label="Veja menos" 
+              onClick={isClosing ? undefined : handleVejaMenos}
+              className={isClosing ? 'animate-pop-out' : 'animate-pop-in'}
+              style={{ animationDelay: isClosing ? '0s' : `${Math.max(0, categories.length - 3) * 0.05}s` }}
+            >
               <div className="w-full h-full bg-white flex items-center justify-center">
                 <span className="material-icons text-red-500 text-4xl">remove</span>
               </div>
