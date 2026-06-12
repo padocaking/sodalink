@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { clearCart, createOrder, fetchCart, formatPrice, setCartItem, type CartItem } from '../api';
+import Header from '../components/Header';
 
 function CartRow({ item, onQtyChange }: { item: CartItem; onQtyChange: (qty: number) => void }) {
   const { product, quantity } = item;
@@ -107,15 +108,7 @@ export default function Cart() {
   return (
     <div className="min-h-full bg-gray-100 flex flex-col">
       {/* Top bar */}
-      <header className="bg-white px-4 py-4 flex items-center gap-3 border-b border-gray-200 sticky top-0 z-20">
-        <button aria-label="Voltar" onClick={() => navigate(-1)}>
-          <span className="material-icons text-gray-800">arrow_back_ios_new</span>
-        </button>
-        <h1 className="flex-1 text-2xl font-semibold text-gray-900">Carrinho</h1>
-        <Link to="/favoritos" aria-label="Favoritos">
-          <span className="material-icons text-gray-800">favorite_border</span>
-        </Link>
-      </header>
+      <Header title="Carrinho" showBack hideSearch hideCart />
 
       <div className="px-4 py-4 flex-1 pb-28">
         <p className="text-base text-gray-900 mb-4">

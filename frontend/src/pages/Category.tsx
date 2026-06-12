@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { fetchCart, fetchFavorites, fetchProducts, type CartItem, type Product } from '../api';
 import ProductCard from '../components/ProductCard';
+import Header from '../components/Header';
 
 export default function Category() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [cartQty, setCartQty] = useState<Map<number, number>>(new Map());
@@ -35,18 +35,7 @@ export default function Category() {
   return (
     <div className="min-h-full bg-gray-100">
       {/* Top bar */}
-      <header className="bg-white px-4 py-4 flex items-center gap-3 border-b border-gray-200 sticky top-0 z-20">
-        <button aria-label="Voltar" onClick={() => navigate(-1)}>
-          <span className="material-icons text-gray-800">arrow_back_ios_new</span>
-        </button>
-        <h1 className="flex-1 text-2xl font-semibold text-gray-900 capitalize">{categoryName}</h1>
-        <button aria-label="Buscar">
-          <span className="material-icons text-gray-800">search</span>
-        </button>
-        <Link to="/carrinho" aria-label="Carrinho">
-          <span className="material-icons text-gray-800">shopping_cart</span>
-        </Link>
-      </header>
+      <Header title={categoryName} showBack hideFavorites />
 
       {/* Filter chips */}
       <div className="bg-white px-4 py-2.5 flex items-center gap-2 overflow-x-auto border-b border-gray-100">
