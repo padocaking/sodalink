@@ -55,7 +55,7 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
       </div>
 
       <Link to={`/produto/${product.slug}`}>
-        <p className="text-sm font-medium text-gray-800 line-clamp-2 min-h-10">{product.name}</p>
+        <p className="text-md font-medium text-gray-800 leading-tight line-clamp-2 min-h-10">{product.name}</p>
 
         <p className="text-xl font-extrabold text-gray-900 leading-tight">
           R$ {reais}<sup className="text-xs">,{centavos}</sup>
