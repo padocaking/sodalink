@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `products` ADD COLUMN `packageType` VARCHAR(50) NULL,
+    ADD COLUMN `unitCount` INTEGER NOT NULL DEFAULT 1,
+    ADD COLUMN `volume` INTEGER NULL;

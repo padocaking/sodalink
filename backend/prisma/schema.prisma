@@ -137,6 +137,9 @@ model Product {
   sku          String?  @unique @db.VarChar(50)
   barcode      String?  @db.VarChar(50)
   unit         String   @default("un") @db.VarChar(10)
+  unitCount    Int      @default(1)
+  volume       Int?
+  packageType  String?  @db.VarChar(50)
   stock        Int      @default(0)
   minStock     Int      @default(0)
   isActive     Boolean  @default(true)
