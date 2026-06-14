@@ -1,4 +1,5 @@
 import { useState, useRef, type UIEvent } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function BannerSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -39,15 +40,15 @@ export default function BannerSlider() {
         className="w-full overflow-x-auto flex snap-x snap-mandatory gap-3 px-3" 
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        <div className="w-[90%] shrink-0 snap-center snap-always h-48 bg-blue-500 flex items-center justify-center rounded-xl">
-          <span className="text-white text-2xl font-bold">Slide 1</span>
-        </div>
-        <div className="w-[90%] shrink-0 snap-center snap-always h-48 bg-green-500 flex items-center justify-center rounded-xl">
-          <span className="text-white text-2xl font-bold">Slide 2</span>
-        </div>
-        <div className="w-[90%] shrink-0 snap-center snap-always h-48 bg-red-500 flex items-center justify-center rounded-xl">
-          <span className="text-white text-2xl font-bold">Slide 3</span>
-        </div>
+        <Link to="/categoria/coca-cola" className="w-[90%] shrink-0 snap-center snap-always h-48 bg-blue-500 flex items-center justify-center rounded-xl overflow-hidden">
+          <img src="http://localhost:3001/uploads/banner/Coca-cola.webp" alt="Coca-cola banner" className="w-full h-full object-cover" />
+        </Link>
+        <Link to="/categoria/sucos" className="w-[90%] shrink-0 snap-center snap-always h-48 bg-green-500 flex items-center justify-center rounded-xl overflow-hidden">
+          <img src="http://localhost:3001/uploads/banner/Dellvale.webp" alt="Dellvale banner" className="w-full h-full object-cover" />
+        </Link>
+        <Link to="/categoria/monster" className="w-[90%] shrink-0 snap-center snap-always h-48 bg-red-500 flex items-center justify-center rounded-xl overflow-hidden">
+          <img src="http://localhost:3001/uploads/banner/monster.jpg" alt="Monster banner" className="w-full h-full object-cover" />
+        </Link>
       </div>
 
       {/* Pagination Dots */}
