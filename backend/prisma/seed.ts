@@ -127,7 +127,7 @@ async function main() {
     // Refrigerantes
     prisma.product.create({
     data: {
-      categoryId: refrigerantes.id, // Variável de categoria de acordo com o seu exemplo
+      categoryId: refrigerantes.id,
       name: "Coca-Cola Original 2L PET - Fardo c/ 6",
       slug: "coca-cola-original-2l-pet-fardo-6",
       description: "Refrigerante Coca-Cola Original 2L embalagem PET. Fardo com 6 unidades.",
@@ -145,6 +145,7 @@ async function main() {
       sortOrder: 1,
       },
     }),
+    // 2
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -165,6 +166,7 @@ async function main() {
         sortOrder: 2,
       },
     }),
+    // 3
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -185,6 +187,7 @@ async function main() {
         sortOrder: 3,
       },
     }),
+    // 4
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -205,6 +208,7 @@ async function main() {
         sortOrder: 4,
       },
     }),
+    // 5
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -225,6 +229,7 @@ async function main() {
         sortOrder: 5,
       },
     }),
+    // 6
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -245,6 +250,7 @@ async function main() {
         sortOrder: 6,
       },
     }),
+    // 7
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -265,6 +271,7 @@ async function main() {
         sortOrder: 7,
       },
     }),
+    // 8
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -285,6 +292,7 @@ async function main() {
         sortOrder: 8,
       },
     }),
+    // 9
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -305,6 +313,7 @@ async function main() {
         sortOrder: 9,
       },
     }),
+    // 10
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -325,6 +334,7 @@ async function main() {
         sortOrder: 10,
       },
     }),
+    // 11
     prisma.product.create({
       data: {
         categoryId: refrigerantes.id,
@@ -343,6 +353,195 @@ async function main() {
         isActive: true,
         isFeatured: false,
         sortOrder: 11,
+      },
+    }),
+    // 12
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Original 1.5L PET - Fardo c/ 6",
+        slug: "coca-cola-original-1-5l-pet-fardo-6",
+        description: "Refrigerante Coca-Cola Original 1.5L embalagem PET. Fardo com 6 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/coca15l.png",
+        price: 50.70,
+        sku: "CC-ORIG-1-5L-PET-6",
+        unit: "fardo",
+        unitCount: 6,
+        volume: 1500,
+        packageType: "pet",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 12,
+      },
+    }),
+    // 13
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Original 2.5L PET - Fardo c/ 4",
+        slug: "coca-cola-original-2-5l-pet-fardo-4",
+        description: "Refrigerante Coca-Cola Original 2.5L embalagem PET. Fardo com 4 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/coca25l.png",
+        price: 46.04,
+        sku: "CC-ORIG-2-5L-PET-4",
+        unit: "fardo",
+        unitCount: 4,
+        volume: 2500,
+        packageType: "pet",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 13,
+      },
+    }),
+    // 14
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Original 3L PET - Fardo c/ 3",
+        slug: "coca-cola-original-3l-pet-fardo-3",
+        description: "Refrigerante Coca-Cola Original 3L embalagem PET. Fardo com 3 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/coca3l.png",
+        price: 50.76,
+        sku: "CC-ORIG-3L-PET-3",
+        unit: "fardo",
+        unitCount: 3,
+        volume: 3000,
+        packageType: "pet",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 14,
+      },
+    }),
+    // 15
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Zero Açúcar 200ml PET - Fardo c/ 12",
+        slug: "coca-cola-zero-acucar-200ml-pet-fardo-12",
+        description: "Refrigerante Coca-Cola Zero Açúcar 200ml embalagem PET. Fardo com 12 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/cocaz200.png",
+        price: 19.32,
+        sku: "CC-ZERO-200ML-PET-12",
+        unit: "fardo",
+        unitCount: 12,
+        volume: 200,
+        packageType: "pet",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 15,
+      },
+    }),
+    // 16
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Zero Açúcar 220ml Lata - Fardo c/ 6",
+        slug: "coca-cola-zero-acucar-220ml-lata-fardo-6",
+        description: "Refrigerante Coca-Cola Zero Açúcar 220ml Lata. Fardo com 6 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/cocaz220.png",
+        price: 12.54,
+        sku: "CC-ZERO-220ML-LATA-6",
+        unit: "fardo",
+        unitCount: 6,
+        volume: 220,
+        packageType: "lata",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 16,
+      },
+    }),
+    // 17
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Zero Açúcar 220ml Lata - Fardo c/ 12",
+        slug: "coca-cola-zero-acucar-220ml-lata-fardo-12",
+        description: "Refrigerante Coca-Cola Zero Açúcar 220ml Lata. Fardo com 12 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/cocaz220b.png",
+        price: 25.08,
+        sku: "CC-ZERO-220ML-LATA-12",
+        unit: "fardo",
+        unitCount: 12,
+        volume: 220,
+        packageType: "lata",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 17,
+      },
+    }),
+    // 18
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Zero Açúcar 250ml Garrafa - Fardo c/ 12",
+        slug: "coca-cola-zero-acucar-250ml-garrafa-fardo-12",
+        description: "Refrigerante Coca-Cola Zero Açúcar 250ml Garrafa. Fardo com 12 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/cocaz250.png",
+        price: 39.60,
+        sku: "CC-ZERO-250ML-GARRAFA-12",
+        unit: "fardo",
+        unitCount: 12,
+        volume: 250,
+        packageType: "garrafa",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 18,
+      },
+    }),
+    // 19
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Zero Açúcar 600ml PET - Fardo c/ 6",
+        slug: "coca-cola-zero-acucar-600ml-pet-fardo-6",
+        description: "Refrigerante Coca-Cola Zero Açúcar 600ml embalagem PET. Fardo com 6 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/cocaz600.png",
+        price: 25.20,
+        sku: "CC-ZERO-600ML-PET-6",
+        unit: "fardo",
+        unitCount: 6,
+        volume: 600,
+        packageType: "pet",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 19,
+      },
+    }),
+    // 20
+    prisma.product.create({
+      data: {
+        categoryId: refrigerantes.id,
+        name: "Coca-Cola Zero Açúcar 1L PET - Fardo c/ 6",
+        slug: "coca-cola-zero-acucar-1l-pet-fardo-6",
+        description: "Refrigerante Coca-Cola Zero Açúcar 1L embalagem PET. Fardo com 6 unidades.",
+        imageUrl: "http://localhost:3001/uploads/products/cocaz1l.png",
+        price: 36.24,
+        sku: "CC-ZERO-1L-PET-6",
+        unit: "fardo",
+        unitCount: 6,
+        volume: 1000,
+        packageType: "pet",
+        stock: 100,
+        minStock: 20,
+        isActive: true,
+        isFeatured: false,
+        sortOrder: 20,
       },
     }),
 
