@@ -33,7 +33,7 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-3 flex flex-col">
-      <div className="relative h-32 bg-gray-50 rounded-xl mb-2">
+      <div className="relative h-32 rounded-xl mb-2">
         {isPromo && (
           <span className="absolute top-2 -left-3 bg-red-600 text-white text-xs font-bold px-3 py-0.5 rounded-r-full z-10">
             Promoções
@@ -64,13 +64,22 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
           <p className="text-[0.65rem] text-gray-400 line-through">{formatPrice(product.comparePrice)}</p>
         ) : (
           <p className="text-[0.65rem] text-gray-500">
-            ({formatPrice(product.price)} preço por unidade)
+            ({formatPrice(Number(product.price) / (product.unitCount || 1))} preço por unidade)
           </p>
         )}
+
+        <p className="text-[0.7rem] text-gray-900 mt-1.5">
+          <span className="text-green-500 font-bold">Caixa</span> - <span className="font-bold">{product.unitCount || 1} unid</span>
+          {product.volume ? (
+            <> x {product.volume >= 1000 ? `${(product.volume / 1000).toString().replace('.', ',')} L` : `${product.volume} ml`}</>
+          ) : ''}
+        </p>
       </Link>
 
-      <span className="self-start mt-2 text-[0.65rem] font-semibold text-blue-700 bg-blue-100 rounded-full px-2.5 py-0.5 uppercase">
-        {product.unit === 'un' ? 'Unidade' : product.unit}
+      
+
+      <span className="self-start mt-2 text-center text-[0.65rem] font-semibold text-blue-700 bg-blue-100 rounded-full px-2.5 py-0.5 uppercase">
+        {product.packageType || (product.unit === 'un' ? 'Unidade' : product.unit)}
       </span>
 
       {/* Quantity stepper */}
