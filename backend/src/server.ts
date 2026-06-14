@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 import { env } from "./config/env.js";
 import { prisma } from "./config/database.js";
 import productRoutes from "./routes/products.js";
@@ -13,6 +14,9 @@ const app = express();
 
 app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json());
+
+// Serve static files from the uploads folder
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);

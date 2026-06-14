@@ -45,29 +45,80 @@ async function main() {
 
   console.log(`Address created: ${address.street}, ${address.number}`);
 
-  // ─── Categories (bebidas não alcoólicas) ─────────────────
+  // ─── Categories ──────────────────────────────────────────
   const categories = await Promise.all([
     prisma.category.create({
-      data: { name: "Refrigerantes", slug: "refrigerantes", sortOrder: 1 },
+      data: { name: "Coca-cola", slug: "coca-cola", imageUrl: "http://localhost:3001/uploads/categories/coca-cola.png", sortOrder: 1 },
     }),
     prisma.category.create({
-      data: { name: "Águas", slug: "aguas", sortOrder: 2 },
+      data: { name: "Sabores", slug: "sabores", imageUrl: "http://localhost:3001/uploads/categories/sabores.png", sortOrder: 2 },
     }),
     prisma.category.create({
-      data: { name: "Sucos", slug: "sucos", sortOrder: 3 },
+      data: { name: "Cervejas", slug: "cervejas", imageUrl: "http://localhost:3001/uploads/categories/cervejas.png", sortOrder: 3 },
     }),
     prisma.category.create({
-      data: { name: "Chás", slug: "chas", sortOrder: 4 },
+      data: { name: "Cervejas Especiais", slug: "cervejas-especiais", imageUrl: "http://localhost:3001/uploads/categories/cervejas_especiais.png", sortOrder: 4 },
     }),
     prisma.category.create({
-      data: { name: "Energéticos", slug: "energeticos", sortOrder: 5 },
+      data: { name: "Águas", slug: "aguas", imageUrl: "http://localhost:3001/uploads/categories/aguas.png", sortOrder: 5 },
     }),
     prisma.category.create({
-      data: { name: "Isotônicos", slug: "isotonicos", sortOrder: 6 },
+      data: { name: "Sucos", slug: "sucos", imageUrl: "http://localhost:3001/uploads/categories/sucos.png", sortOrder: 6 },
+    }),
+    prisma.category.create({
+      data: { name: "Chás", slug: "chas", imageUrl: "http://localhost:3001/uploads/categories/chas.png", sortOrder: 7 },
+    }),
+    prisma.category.create({
+      data: { name: "Monster", slug: "monster", imageUrl: "http://localhost:3001/uploads/categories/monster.png", sortOrder: 8 },
+    }),
+    prisma.category.create({
+      data: { name: "Bebidas Esportivas", slug: "bebidas-esportivas", imageUrl: "http://localhost:3001/uploads/categories/bebidas_esportivas.png", sortOrder: 9 },
+    }),
+    prisma.category.create({
+      data: { name: "Drinks Prontos", slug: "drinks-prontos", imageUrl: "http://localhost:3001/uploads/categories/drinks_prontos.png", sortOrder: 10 },
+    }),
+    prisma.category.create({
+      data: { name: "Destilados", slug: "destilados", imageUrl: "http://localhost:3001/uploads/categories/destilados.png", sortOrder: 11 },
+    }),
+    prisma.category.create({
+      data: { name: "Vinhos", slug: "vinhos", imageUrl: "http://localhost:3001/uploads/categories/vinhos.png", sortOrder: 12 },
+    }),
+    prisma.category.create({
+      data: { name: "Balas e gomas", slug: "balas-e-gomas", imageUrl: "http://localhost:3001/uploads/categories/balas_e_gomas.png", sortOrder: 13 },
+    }),
+    prisma.category.create({
+      data: { name: "Doces e cereais", slug: "doces-e-cereais", imageUrl: "http://localhost:3001/uploads/categories/doces_e_cereais.png", sortOrder: 14 },
+    }),
+    prisma.category.create({
+      data: { name: "Salgadinhos", slug: "salgadinhos", imageUrl: "http://localhost:3001/uploads/categories/salgadinhos.png", sortOrder: 15 },
     }),
   ]);
 
-  const [refrigerantes, aguas, sucos, chas, energeticos, isotonicos] = categories;
+  const [
+    cocaCola,
+    sabores,
+    cervejas,
+    cervejasEspeciais,
+    aguasCategory,
+    sucosCategory,
+    chasCategory,
+    monster,
+    bebidasEsportivas,
+    drinksProntos,
+    destilados,
+    vinhos,
+    balasEGomas,
+    docesECereais,
+    salgadinhos
+  ] = categories;
+
+  // Compatibility aliases for the existing products defined below
+  const refrigerantes = cocaCola;
+  const aguas = aguasCategory;
+  const sucos = sucosCategory;
+  const chas = chasCategory;
+  const energeticos = monster;
+  const isotonicos = bebidasEsportivas;
 
   console.log(`Categories created: ${categories.map((c) => c.name).join(", ")}`);
 
