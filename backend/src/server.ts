@@ -9,6 +9,7 @@ import categoryRoutes from "./routes/categories.js";
 import favoriteRoutes from "./routes/favorites.js";
 import cartRoutes from "./routes/cart.js";
 import orderRoutes from "./routes/orders.js";
+import userRoutes from "./routes/users.js";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/api/health", async (_req, res) => {
   try {

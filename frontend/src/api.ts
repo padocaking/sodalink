@@ -28,6 +28,19 @@ export interface Product {
   category: { id: number; name: string; slug: string };
 }
 
+export interface AdminUser {
+  id: number;
+  clientNumber: string;
+  name: string;
+  email: string;
+  document: string;
+  documentType: 'CPF' | 'CNPJ';
+  phone: string;
+  creditBalance: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`);
   if (!res.ok) throw new Error(`Erro ao buscar dados (${res.status})`);
@@ -35,6 +48,8 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export const fetchCategories = () => get<Category[]>('/api/categories');
+
+export const fetchUsers = () => get<AdminUser[]>('/api/users');
 
 export const fetchProducts = (params?: { categorySlug?: string; featured?: boolean; search?: string }) => {
   const query = new URLSearchParams();

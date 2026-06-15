@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import { fetchCategories, fetchProducts, type Category, type Product } from '../api';
+import { fetchCategories, fetchProducts, fetchUsers, type Category, type Product, type AdminUser } from '../api';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
@@ -33,6 +33,17 @@ export default function Admin() {
   const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
+  // Estados para gestão de Usuários
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+  const [userDocument, setUserDocument] = useState('');
+  const [userDocType, setUserDocType] = useState<'CPF' | 'CNPJ'>('CPF');
+  const [userPhone, setUserPhone] = useState('');
+  const [isSavingUser, setIsSavingUser] = useState(false);
+
   useEffect(() => {
     if (selectedCategory) {
       setLoadingProducts(true);
@@ -52,7 +63,57 @@ export default function Admin() {
       .then(setCategories)
       .catch(() => setError('Não foi possível carregar as categorias.'))
       .finally(() => setLoading(false));
+    fetchUsers()
+      .then(setUsers)
+      .catch(() => { /* lista de usuários é opcional */ });
   }, []);
+
+  const closeUserModal = () => {
+    setIsAddUserModalOpen(false);
+    setUserName('');
+    setUserEmail('');
+    setUserPassword('');
+    setUserDocument('');
+    setUserDocType('CPF');
+    setUserPhone('');
+  };
+
+  const handleSaveUser = async () => {
+    if (!userName.trim() || !userEmail.trim() || !userPassword.trim() || !userDocument.trim() || !userPhone.trim()) {
+      alert('Preencha nome, email, senha, documento e telefone.');
+      return;
+    }
+    if (userPassword.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    setIsSavingUser(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/api/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({
+          name: userName,
+          email: userEmail,
+          password: userPassword,
+          document: userDocument,
+          documentType: userDocType,
+          phone: userPhone,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error ?? 'Erro ao criar usuário');
+
+      setUsers((prev) => [data, ...prev]);
+      closeUserModal();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Não foi possível criar o usuário.');
+    } finally {
+      setIsSavingUser(false);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -258,6 +319,39 @@ export default function Admin() {
                   <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">{cat.productCount} produtos</span>
                 </div>
               ))}
+            </div>
+
+            {/* Usuários */}
+            <div className="flex items-center justify-between mb-4 mt-8">
+              <h1 className="text-xl font-bold text-gray-900">Usuários</h1>
+              <button
+                onClick={() => setIsAddUserModalOpen(true)}
+                className="bg-red-600 text-white px-3 py-1.5 rounded-xl text-sm font-semibold shadow-sm active:scale-95 transition flex items-center gap-1"
+              >
+                <span className="material-icons text-[1rem]">person_add</span>
+                Novo usuário
+              </button>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm">
+              {users.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-6">Nenhum usuário cadastrado.</p>
+              ) : (
+                users.map((u) => (
+                  <div key={u.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-50 last:border-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                        <span className="material-icons text-[1.2rem]">person</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{u.name}</p>
+                        <p className="text-[0.65rem] text-gray-500 truncate">{u.email}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md shrink-0 ml-2">#{u.clientNumber}</span>
+                  </div>
+                ))
+              )}
             </div>
           </>
         ) : (
@@ -473,6 +567,58 @@ export default function Admin() {
               <button onClick={closeProdModal} className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-700 text-sm font-bold hover:bg-gray-50 transition active:scale-95">Cancelar</button>
               <button onClick={handleSaveProduct} disabled={isSavingProduct} className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white text-sm font-bold shadow-sm hover:bg-red-700 transition active:scale-95 disabled:opacity-60">
                 {isSavingProduct ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Adicionar Usuário */}
+      {isAddUserModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-pop-in my-auto">
+            <h2 className="text-xl font-bold text-gray-900 mb-5">Novo Usuário</h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Nome</label>
+                <input type="text" placeholder="Ex: João da Silva" value={userName} onChange={e => setUserName(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition text-sm text-gray-900 font-medium" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
+                <input type="email" placeholder="email@exemplo.com" value={userEmail} onChange={e => setUserEmail(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition text-sm text-gray-900 font-medium" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Senha</label>
+                <input type="password" placeholder="Mínimo 6 caracteres" value={userPassword} onChange={e => setUserPassword(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition text-sm text-gray-900 font-medium" />
+              </div>
+
+              <div className="flex gap-3">
+                <div className="w-28">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tipo</label>
+                  <select value={userDocType} onChange={e => setUserDocType(e.target.value as 'CPF' | 'CNPJ')} className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition text-sm text-gray-900 font-medium bg-white">
+                    <option value="CPF">CPF</option>
+                    <option value="CNPJ">CNPJ</option>
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Documento</label>
+                  <input type="text" placeholder={userDocType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'} value={userDocument} onChange={e => setUserDocument(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition text-sm text-gray-900 font-medium" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Telefone</label>
+                <input type="text" placeholder="+55 (41) 99999-9999" value={userPhone} onChange={e => setUserPhone(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition text-sm text-gray-900 font-medium" />
+              </div>
+            </div>
+
+            <div className="mt-8 flex gap-3">
+              <button onClick={closeUserModal} className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-700 text-sm font-bold hover:bg-gray-50 transition active:scale-95">Cancelar</button>
+              <button onClick={handleSaveUser} disabled={isSavingUser} className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white text-sm font-bold shadow-sm hover:bg-red-700 transition active:scale-95 disabled:opacity-60">
+                {isSavingUser ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
           </div>
