@@ -25,7 +25,7 @@ function App() {
   const isCategoryPage = location.pathname.startsWith('/categoria')
     || location.pathname.startsWith('/favoritos')
     || location.pathname.startsWith('/carrinho')
-    || location.pathname.startsWith('/admin');
+    || location.pathname.startsWith('/admin')
     || location.pathname.startsWith('/finalizar')
     || location.pathname.startsWith('/pesquisa')
     || location.pathname.startsWith('/pedido/');
