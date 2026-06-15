@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Category from './pages/Category';
 import Categories from './pages/Categories';
@@ -21,6 +21,7 @@ import { getStoredUser, logout, type AuthUser } from './auth';
 
 function App() {
   const [user, setUser] = useState<AuthUser | null>(getStoredUser);
+  const [productSlug, setProductSlug] = useState<string | null>(null);
   const location = useLocation();
   const isCategoryPage = location.pathname.startsWith('/categoria')
     || location.pathname.startsWith('/favoritos')
@@ -37,6 +38,17 @@ function App() {
   const startYRef = useRef(0);
   const directionRef = useRef<'h' | 'v' | 'ignore' | null>(null);
   const mouseDownRef = useRef(false);
+
+  useEffect(() => {
+    const handleOpenProduct = (e: Event) => {
+      const slug = (e as CustomEvent).detail;
+      if (typeof slug === 'string') {
+        setProductSlug(slug);
+      }
+    };
+    window.addEventListener('open-product', handleOpenProduct);
+    return () => window.removeEventListener('open-product', handleOpenProduct);
+  }, []);
 
   const handlePointerStart = (clientX: number, clientY: number) => {
     startXRef.current = clientX;
@@ -143,7 +155,7 @@ function App() {
             <Route path="/pedido/:orderNumber" element={<OrderDetail />} />
             <Route path="/categoria/:slug" element={<Category />} />
             <Route path="/categorias" element={<Categories />} />
-            <Route path="/produto/:slug" element={<Product />} />
+            {/* A página de produto agora é um modal renderizado a partir do App.tsx */}
             <Route path="/favoritos" element={<Favorites />} />
             <Route path="/carrinho" element={<Cart />} />
             <Route path="/pesquisa" element={<Search />} />
@@ -159,6 +171,10 @@ function App() {
           isMenuOpen={isMenuOpen}
         />
       </div>
+
+      {productSlug && (
+        <Product slug={productSlug} onClose={() => setProductSlug(null)} />
+      )}
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { formatPrice, setCartItem, type Product } from '../api';
 import FavoriteButton from './FavoriteButton';
 
@@ -31,6 +30,11 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
 
   const [reais, centavos] = Number(product.price).toFixed(2).split('.');
 
+  const handleProductClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.dispatchEvent(new CustomEvent('open-product', { detail: product.slug }));
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-sm p-3 flex flex-col">
       <div className="relative h-32 rounded-xl mb-2">
@@ -39,13 +43,13 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
             Promoções
           </span>
         )}
-        <Link to={`/produto/${product.slug}`} className="h-full w-full flex items-center justify-center">
+        <a href={`/produto/${product.slug}`} onClick={handleProductClick} className="h-full w-full flex items-center justify-center cursor-pointer">
           {product.imageUrl ? (
             <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain" />
           ) : (
             <span className="material-icons text-gray-300 text-6xl">local_drink</span>
           )}
-        </Link>
+        </a>
         <FavoriteButton
           productId={product.id}
           favorited={favorited}
@@ -54,7 +58,7 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
         />
       </div>
 
-      <Link to={`/produto/${product.slug}`}>
+      <a href={`/produto/${product.slug}`} onClick={handleProductClick} className="cursor-pointer">
         <p className="text-md font-medium text-gray-800 leading-tight line-clamp-2 min-h-10">{product.name}</p>
 
         <p className="text-xl font-extrabold text-gray-900 leading-tight">
@@ -74,7 +78,7 @@ export default function ProductCard({ product, favorited, onFavoriteChange, show
             <> x {product.volume >= 1000 ? `${(product.volume / 1000).toString().replace('.', ',')} L` : `${product.volume} ml`}</>
           ) : ''}
         </p>
-      </Link>
+      </a>
 
       
 
