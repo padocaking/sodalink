@@ -5,6 +5,9 @@ import Categories from './pages/Categories';
 import Product from './pages/Product';
 import Favorites from './pages/Favorites';
 import Cart from './pages/Cart';
+import Search from './pages/Search';
+import OrderReview from './pages/OrderReview';
+import OrderDetail from './pages/OrderDetail';
 import OrderSuccess from './pages/OrderSuccess';
 import Home from './pages/Home';
 import Header from './components/Header';
@@ -20,7 +23,10 @@ function App() {
   const location = useLocation();
   const isCategoryPage = location.pathname.startsWith('/categoria')
     || location.pathname.startsWith('/favoritos')
-    || location.pathname.startsWith('/carrinho');
+    || location.pathname.startsWith('/carrinho')
+    || location.pathname.startsWith('/finalizar')
+    || location.pathname.startsWith('/pesquisa')
+    || location.pathname.startsWith('/pedido/');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -132,11 +138,14 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/pedido" element={<Order />} />
+            <Route path="/pedido/:orderNumber" element={<OrderDetail />} />
             <Route path="/categoria/:slug" element={<Category />} />
             <Route path="/categorias" element={<Categories />} />
             <Route path="/produto/:slug" element={<Product />} />
             <Route path="/favoritos" element={<Favorites />} />
             <Route path="/carrinho" element={<Cart />} />
+            <Route path="/pesquisa" element={<Search />} />
+            <Route path="/finalizar" element={<OrderReview />} />
             <Route path="/pedido-concluido" element={<OrderSuccess />} />
             <Route path="/conta" element={<User user={user} onLogout={handleLogout} />} />
           </Routes>

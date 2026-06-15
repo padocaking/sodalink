@@ -17,6 +17,9 @@ export interface Product {
   price: string;
   comparePrice: string | null;
   unit: string;
+  unitCount: number;
+  volume: number | null;
+  packageType: string | null;
   stock: number;
   isFeatured: boolean;
   category: { id: number; name: string; slug: string };
@@ -81,6 +84,7 @@ export interface Order {
   status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
   subtotal: string;
   total: string;
+  paymentMethod: 'CREDIT_BALANCE' | 'BOLETO' | 'PIX' | 'CREDIT_CARD' | string;
   createdAt: string;
   deliveredAt: string | null;
   cancelledAt: string | null;
@@ -117,6 +121,12 @@ export async function createOrder(): Promise<Order> {
 export async function fetchOrders(): Promise<Order[]> {
   const res = await fetch(`${API_URL}/api/orders`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`Erro ao buscar pedidos (${res.status})`);
+  return res.json();
+}
+
+export async function fetchOrder(orderNumber: string): Promise<Order> {
+  const res = await fetch(`${API_URL}/api/orders/${orderNumber}`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`Erro ao buscar pedido (${res.status})`);
   return res.json();
 }
 
