@@ -113,42 +113,6 @@ export default function OrderReview() {
             </div>
           </div>
 
-          {/* Lista de compras - Pedido regular */}
-          <SectionCard title="Lista de compras" onClick={() => navigate('/carrinho')}>
-            <p className="text-sm text-gray-500">Pedido regular</p>
-            <p className="mt-1 text-sm text-gray-600">
-              <span className="font-bold text-gray-800">{totalPieces}</span> produtos não retornáveis
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-bold text-gray-800">0</span> produtos retornáveis
-            </p>
-          </SectionCard>
-
-          {/* Lista de compras - Promoções */}
-          <SectionCard title="Lista de compras" onClick={() => {}}>
-            <p className="text-sm text-gray-500">Promoções</p>
-            <p className="mt-1 text-sm text-gray-600">
-              <span className="font-bold text-gray-800">0</span> produtos não retornáveis
-            </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-bold text-gray-800">0</span> produtos retornáveis
-            </p>
-          </SectionCard>
-
-          {/* Embalagem retornável */}
-          <div className="bg-white rounded-2xl shadow-sm px-5 py-4 flex gap-3">
-            <span className="material-icons text-emerald-500 bg-emerald-50 rounded-full p-1.5 text-[1.3rem] self-start">
-              autorenew
-            </span>
-            <div>
-              <h3 className="text-base font-semibold text-emerald-500">Embalagem retornável</h3>
-              <p className="text-sm text-gray-500 leading-snug mt-0.5">
-                Certifique-se de devolver a mesma quantidade de recipientes retornáveis. Caso
-                contrário, infelizmente não poderemos proceder à entrega.
-              </p>
-            </div>
-          </div>
-
           {/* Resumo */}
           <div className="bg-white rounded-2xl shadow-sm px-5 py-4">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Resumo</h2>

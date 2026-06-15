@@ -36,7 +36,7 @@ function statusStepIndex(status: Order['status']): number {
 function PriceParts({ value, large }: { value: string | number; large?: boolean }) {
   const [reais, centavos] = Number(value).toFixed(2).split('.');
   return (
-    <span className={`font-extrabold text-gray-900 ${large ? 'text-3xl' : 'text-xl'}`}>
+    <span className={`font-extrabold text-gray-900 whitespace-nowrap ${large ? 'text-3xl' : 'text-xl'}`}>
       R$ {reais}<sup className={`font-bold ${large ? 'text-xs' : 'text-[0.6rem]'}`}>,{centavos}</sup>
     </span>
   );
@@ -48,6 +48,7 @@ export default function OrderDetail() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     if (!orderNumber) return;
@@ -56,6 +57,23 @@ export default function OrderDetail() {
       .catch(() => setError('Não foi possível carregar o pedido.'))
       .finally(() => setLoading(false));
   }, [orderNumber]);
+
+  const handleCancelOrder = async () => {
+    if (!order) return;
+    if (!window.confirm('Tem certeza que deseja cancelar este pedido?')) {
+      return;
+    }
+    setIsCancelling(true);
+    setError('');
+    try {
+      const refreshedOrder = await fetchOrder(order.orderNumber);
+      setOrder(refreshedOrder);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ocorreu um erro ao cancelar.');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   let dateBadge = '';
   if (order) {
@@ -92,40 +110,51 @@ export default function OrderDetail() {
         <div className="flex-1 overflow-y-auto pb-8">
           {/* Status banner */}
           <div className={`px-5 py-4 flex items-center gap-4 ${cancelled ? 'bg-red-50' : 'bg-amber-100/70'}`}>
-            <span className="bg-amber-400 text-white text-sm font-semibold px-3 py-2 rounded-md whitespace-nowrap">
+            <span className={`${cancelled ? 'bg-red-400' : 'bg-amber-400'} text-white text-sm font-semibold px-3 py-2 rounded-md whitespace-nowrap`}>
               {dateBadge}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-amber-700/80">Ordem</p>
-              <p className="text-sm font-semibold text-amber-800 break-all leading-tight">{order.orderNumber}</p>
+              <p className={`text-xs ${cancelled ? 'text-red-700/80' : 'text-amber-700/80'}`}>Ordem</p>
+              <p className={`text-sm font-semibold ${cancelled ? 'text-red-800' : 'text-amber-800'} break-all leading-tight`}>{order.orderNumber}</p>
             </div>
             <div className="shrink-0">
-              <p className="text-xs text-amber-700/80">Status</p>
-              <p className="text-sm font-semibold text-amber-800">{statusLabel}</p>
+              <p className={`text-xs ${cancelled ? 'text-red-700/80' : 'text-amber-700/80'}`}>Status</p>
+              <p className={`text-sm font-semibold ${cancelled ? 'text-red-800' : 'text-amber-800'}`}>{statusLabel}</p>
               {!cancelled && (
                 <div className="flex gap-1 mt-1">
                   {STATUS_STEPS.map((_, i) => (
                     <span
                       key={i}
-                      className={`h-1 w-6 rounded-full ${i <= stepIndex ? 'bg-amber-500' : 'bg-amber-200'}`}
+                      className={`h-1 w-6 rounded-full ${i <= stepIndex ? 'bg-amber-500' : 'bg-amber-300'}`}
                     />
                   ))}
                 </div>
               )}
             </div>
-            <span className="material-icons text-amber-600 text-[1.4rem]">info</span>
+            <span className={`material-icons ${cancelled ? 'text-red-600' : 'text-amber-600'} text-[1.4rem]`}>
+              {cancelled ? 'cancel' : 'info'}
+            </span>
           </div>
 
           {/* Items */}
           <div className="px-5">
             {order.orderItems.map((item) => (
-              <div key={item.id} className="py-4 border-b border-gray-100 flex items-center justify-between gap-3">
-                <div className="min-w-0">
+              <div key={item.id} className="py-4 border-b border-gray-100 flex items-center gap-4">
+                <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center shrink-0">
+                  {item.product.imageUrl ? (
+                    <img src={item.product.imageUrl} alt={item.product.name} className="h-full w-full object-contain" />
+                  ) : (
+                    <span className="material-icons text-gray-300 text-4xl">local_drink</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-500">{item.product.id}</p>
                   <p className="text-base text-gray-900 leading-tight">{item.product.name}</p>
                   <p className="text-sm font-semibold text-emerald-500 mt-1">{item.quantity} Peças</p>
                 </div>
-                <PriceParts value={item.totalPrice} />
+                <div className="text-right">
+                  <PriceParts value={item.totalPrice} />
+                </div>
               </div>
             ))}
           </div>
@@ -163,6 +192,29 @@ export default function OrderDetail() {
             <span className="text-2xl font-bold text-gray-900">Total:</span>
             <PriceParts value={total} large />
           </div>
+
+          {/* Cancel Button */}
+          {order && !cancelled && stepIndex < 2 && (
+            <div className="px-5 pt-2 pb-4">
+              <button
+                onClick={handleCancelOrder}
+                disabled={isCancelling}
+                className="w-full bg-red-100 text-red-700 font-semibold py-3.5 rounded-full shadow-sm active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isCancelling ? (
+                  <>
+                    <span className="material-icons animate-spin text-xl">sync</span>
+                    Cancelando...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-icons text-xl">cancel</span>
+                    Cancelar Pedido
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
