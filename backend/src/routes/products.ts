@@ -88,8 +88,8 @@ router.get("/:slug", async (req, res) => {
 // POST /api/products (Upload + Criação do Produto)
 router.post("/", uploadProd.single("image"), async (req, res) => {
   try {
-    const { categoryId, name, price, volume, packageType, unitCount } = req.body;
-    
+    const { categoryId, name, price, volume, packageType, unitCount, isFeatured, comparePrice } = req.body;
+
     if (!name || !price || !categoryId) {
       res.status(400).json({ error: "Nome, preço e categoria são obrigatórios." });
       return;
@@ -119,6 +119,8 @@ router.post("/", uploadProd.single("image"), async (req, res) => {
         unitCount: unitCount ? parseInt(unitCount, 10) : 1,
         imageUrl,
         isActive: true,
+        isFeatured: isFeatured === "true" || isFeatured === true,
+        comparePrice: comparePrice ? parseFloat(String(comparePrice).replace(',', '.')) : null,
       },
       include: {
         category: true // Traz a categoria junto para renderizar corretamente no Admin.tsx
@@ -142,7 +144,7 @@ router.put("/:id", uploadProd.single("image"), async (req, res) => {
       return;
     }
 
-    const { categoryId, name, price, volume, packageType, unitCount } = req.body;
+    const { categoryId, name, price, volume, packageType, unitCount, isFeatured, comparePrice } = req.body;
 
     const data: any = {};
     if (categoryId) data.categoryId = parseInt(categoryId, 10);
@@ -151,6 +153,8 @@ router.put("/:id", uploadProd.single("image"), async (req, res) => {
     if (volume !== undefined) data.volume = volume ? parseInt(volume, 10) : null;
     if (packageType !== undefined) data.packageType = packageType || null;
     if (unitCount) data.unitCount = parseInt(unitCount, 10);
+    if (isFeatured !== undefined) data.isFeatured = isFeatured === "true" || isFeatured === true;
+    if (comparePrice !== undefined) data.comparePrice = comparePrice ? parseFloat(String(comparePrice).replace(',', '.')) : null;
 
     if (req.file) {
       const host = req.protocol + '://' + req.get('host');

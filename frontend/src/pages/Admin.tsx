@@ -19,6 +19,8 @@ export default function Admin() {
   const [prodVolume, setProdVolume] = useState('');
   const [prodPackage, setProdPackage] = useState('');
   const [prodUnitCount, setProdUnitCount] = useState('1');
+  const [prodIsPromo, setProdIsPromo] = useState(false);
+  const [prodPromoPrice, setProdPromoPrice] = useState('');
   const [prodImage, setProdImage] = useState<File | null>(null);
   const [prodPreview, setProdPreview] = useState<string | null>(null);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
@@ -76,6 +78,8 @@ export default function Admin() {
     setProdVolume('');
     setProdPackage('');
     setProdUnitCount('1');
+    setProdIsPromo(false);
+    setProdPromoPrice('');
     setProdImage(null);
     setProdPreview(null);
   };
@@ -83,10 +87,19 @@ export default function Admin() {
   const openEditProdModal = (product: Product) => {
     setEditingProductId(product.id);
     setProdName(product.name);
-    setProdPrice(Number(product.price).toFixed(2));
     setProdVolume(product.volume ? product.volume.toString() : '');
     setProdPackage(product.packageType || '');
     setProdUnitCount(product.unitCount ? product.unitCount.toString() : '1');
+    // Produto em promoção: price = preço promocional, comparePrice = preço normal.
+    const onPromo = product.isFeatured && product.comparePrice != null;
+    setProdIsPromo(onPromo);
+    if (onPromo) {
+      setProdPrice(Number(product.comparePrice).toFixed(2));
+      setProdPromoPrice(Number(product.price).toFixed(2));
+    } else {
+      setProdPrice(Number(product.price).toFixed(2));
+      setProdPromoPrice('');
+    }
     setProdPreview(product.imageUrl || null);
     setProdImage(null);
     setIsAddProductModalOpen(true);
@@ -97,12 +110,25 @@ export default function Admin() {
       alert('Nome e preço do produto são obrigatórios.');
       return;
     }
+    if (prodIsPromo && !prodPromoPrice.trim()) {
+      alert('Informe o preço promocional.');
+      return;
+    }
     setIsSavingProduct(true);
     try {
       const formData = new FormData();
       formData.append('categoryId', selectedCategory.id.toString());
       formData.append('name', prodName);
-      formData.append('price', prodPrice);
+      if (prodIsPromo) {
+        // Em promoção: price = preço promocional, comparePrice = preço normal (riscado)
+        formData.append('price', prodPromoPrice);
+        formData.append('comparePrice', prodPrice);
+        formData.append('isFeatured', 'true');
+      } else {
+        formData.append('price', prodPrice);
+        formData.append('comparePrice', '');
+        formData.append('isFeatured', 'false');
+      }
       if (prodVolume) formData.append('volume', prodVolume);
       if (prodPackage) formData.append('packageType', prodPackage);
       if (prodUnitCount) formData.append('unitCount', prodUnitCount);
@@ -274,13 +300,23 @@ export default function Admin() {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-800 truncate">{product.name}</p>
+                          <p className="text-sm font-semibold text-gray-800 truncate flex items-center gap-1.5">
+                            {product.name}
+                            {product.isFeatured && product.comparePrice != null && (
+                              <span className="shrink-0 text-[0.6rem] font-bold text-red-600 bg-red-50 rounded-full px-1.5 py-0.5 uppercase">Promo</span>
+                            )}
+                          </p>
                           <p className="text-[0.65rem] text-gray-500 mt-0.5">
                             {product.volume ? (product.volume >= 1000 ? `${(product.volume / 1000).toString().replace('.', ',')} L` : `${product.volume} ml`) : ''}
                             {product.volume && product.packageType ? ' • ' : ''}
                             <span className="capitalize">{product.packageType || (product.unit === 'un' ? 'Unidade' : product.unit)}</span>
                           </p>
-                          <p className="text-xs font-bold text-gray-900 mt-0.5">R$ {reais},{centavos}</p>
+                          <p className="text-xs font-bold text-gray-900 mt-0.5">
+                            R$ {reais},{centavos}
+                            {product.isFeatured && product.comparePrice != null && (
+                              <span className="ml-1.5 text-[0.65rem] font-normal text-gray-400 line-through">R$ {Number(product.comparePrice).toFixed(2).replace('.', ',')}</span>
+                            )}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -390,7 +426,33 @@ export default function Admin() {
                   <input type="number" placeholder="Ex: 12" value={prodUnitCount} onChange={e => setProdUnitCount(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition text-sm text-gray-900 font-medium" />
                 </div>
               </div>
-              
+
+              {/* Promoção */}
+              <div className="border border-gray-200 rounded-xl p-4">
+                <label className="flex items-center justify-between cursor-pointer">
+                  <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                    <span className="material-icons text-red-600 text-[1.2rem]">sell</span>
+                    Colocar em promoção
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={prodIsPromo}
+                    onClick={() => setProdIsPromo(v => !v)}
+                    className={`relative w-11 h-6 rounded-full transition ${prodIsPromo ? 'bg-red-600' : 'bg-gray-300'}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${prodIsPromo ? 'translate-x-5' : ''}`} />
+                  </button>
+                </label>
+                {prodIsPromo && (
+                  <div className="mt-4">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Preço promocional (R$)</label>
+                    <input type="number" step="0.01" placeholder="0.00" value={prodPromoPrice} onChange={e => setProdPromoPrice(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition text-sm text-gray-900 font-medium" />
+                    <p className="text-[0.7rem] text-gray-500 mt-1.5">O preço normal (R$ {prodPrice || '0.00'}) aparecerá riscado. O produto será exibido na Home e na categoria Promoções.</p>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">Imagem</label>
                 <label className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-red-400 hover:text-red-500 transition cursor-pointer overflow-hidden aspect-square w-32 mx-auto relative">
