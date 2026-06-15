@@ -26,6 +26,30 @@ router.get("/", async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/orders/:orderNumber — Get a single order owned by the user
+router.get("/:orderNumber", async (req: AuthRequest, res) => {
+  try {
+    const order = await prisma.order.findFirst({
+      where: { orderNumber: String(req.params.orderNumber), userId: req.userId },
+      include: {
+        orderItems: {
+          include: { product: { select: { id: true, name: true, slug: true, imageUrl: true, unit: true } } },
+        },
+      },
+    });
+
+    if (!order) {
+      res.status(404).json({ error: "Pedido não encontrado" });
+      return;
+    }
+
+    res.json(order);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ error: "Failed to fetch order" });
+  }
+});
+
 // POST /api/orders — Create an order from the cart (no payment step yet)
 router.post("/", async (req: AuthRequest, res) => {
   try {

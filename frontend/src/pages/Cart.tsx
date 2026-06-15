@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { clearCart, createOrder, fetchCart, formatPrice, setCartItem, type CartItem } from '../api';
+import { clearCart, fetchCart, formatPrice, setCartItem, type CartItem } from '../api';
 import Header from '../components/Header';
 
 function CartRow({ item, onQtyChange }: { item: CartItem & { isRemoving?: boolean }; onQtyChange: (qty: number) => Promise<void> }) {
@@ -82,7 +82,6 @@ export default function Cart() {
   const navigate = useNavigate();
   const [items, setItems] = useState<(CartItem & { isRemoving?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -138,16 +137,9 @@ export default function Cart() {
       });
   };
 
-  const handleCheckout = async () => {
-    setSubmitting(true);
-    setError('');
-    try {
-      const order = await createOrder();
-      navigate('/pedido-concluido', { state: { orderNumber: order.orderNumber } });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao finalizar pedido');
-      setSubmitting(false);
-    }
+  const handleCheckout = () => {
+    if (items.length === 0) return;
+    navigate('/finalizar');
   };
 
   const total = items.reduce((sum, i) => sum + Number(i.product.price) * i.quantity, 0);
@@ -231,10 +223,10 @@ export default function Cart() {
         </div>
         <button
           onClick={handleCheckout}
-          disabled={submitting || items.length === 0}
+          disabled={items.length === 0}
           className="bg-emerald-400 text-white text-lg font-semibold px-8 py-3 rounded-full shadow-sm active:scale-[0.98] transition disabled:opacity-50"
         >
-          {submitting ? 'Finalizando...' : 'Finalizar pedido'}
+          Finalizar pedido
         </button>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 export type OrderStatus = 'andamento' | 'entregue' | 'cancelado';
 
 export interface OrderData {
@@ -42,6 +44,8 @@ const statusConfig: Record<OrderStatus, {
 
 export default function OrderCard({ order }: { order: OrderData }) {
   const config = statusConfig[order.status];
+  const navigate = useNavigate();
+  const goToDetail = () => navigate(`/pedido/${order.orderNumber}`);
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
@@ -105,7 +109,7 @@ export default function OrderCard({ order }: { order: OrderData }) {
           ) : (
             <div />
           )}
-          <button className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={goToDetail} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
             Ver detalhes
           </button>
         </div>

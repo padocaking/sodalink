@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import BannerSlider from '../components/BannerSlider';
 import ProductCard from '../components/ProductCard';
-import { fetchCategories, fetchProducts, formatPrice, fetchFavorites, fetchCart, type Category, type Product, type CartItem } from '../api';
+import { fetchCategories, fetchProducts, fetchFavorites, fetchCart, type Category, type Product, type CartItem } from '../api';
 
 const tileColors = [
   'bg-red-300', 'bg-green-300', 'bg-yellow-200', 'bg-blue-200', 'bg-orange-200', 'bg-purple-200',

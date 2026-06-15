@@ -57,9 +57,9 @@ export default function Header({ title, showBack, hideFavorites, hideSearch, hid
           </Link>
         )}
         {!isOrderPage && !hideSearch && (
-          <button aria-label="Search" className="p-2 -m-2 cursor-pointer">
+          <Link to="/pesquisa" aria-label="Search" className="p-2 -m-2 cursor-pointer">
             <span className="material-icons text-gray-800 text-[32px]">search</span>
-          </button>
+          </Link>
         )}
         {!hideCart && (
           <Link to="/carrinho" aria-label="Cart" className="relative p-2 -m-2 cursor-pointer flex items-center justify-center">
