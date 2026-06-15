@@ -48,6 +48,7 @@ export default function Home() {
   const [isClosing, setIsClosing] = useState(false);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
+  const [saboresProducts, setSaboresProducts] = useState<Product[]>([]);
   const [cartQty, setCartQty] = useState<Map<number, number>>(new Map());
 
   useEffect(() => {
@@ -57,8 +58,9 @@ export default function Home() {
       fetchProducts(),
       fetchFavorites().catch(() => [] as Product[]),
       fetchCart().catch(() => [] as CartItem[]),
+      fetchProducts({ categorySlug: 'sabores' }),
     ])
-      .then(([cats, featured, allProds, favs, cart]) => {
+      .then(([cats, featured, allProds, favs, cart, sabores]) => {
         setCategories(cats);
         setPromos(featured);
         // Shuffle all products to get random recommendations
@@ -66,6 +68,7 @@ export default function Home() {
         setRecommendations(shuffled.slice(0, 10));
         setFavoriteIds(new Set(favs.map((f) => f.id)));
         setCartQty(new Map(cart.map((c) => [c.productId, c.quantity])));
+        setSaboresProducts(sabores);
       })
       .catch(() => setError('Não foi possível carregar os dados. Verifique a API.'));
   }, []);
@@ -217,6 +220,33 @@ export default function Home() {
           ))}
           {!error && promos.length === 0 && (
             <p className="text-sm text-gray-400 py-4">Nenhuma promoção no momento.</p>
+          )}
+        </div>
+      </section>
+
+      {/* Banner Sabores */}
+      <section className="mt-6">
+        <img src="https://designconceitual.com.br/wp-content/uploads/2017/05/Fanta-Nova-Identidade-Visual-1000x600.jpg" alt="Banner Sabores" className="w-full h-auto" />
+      </section>
+
+      {/* Sabores */}
+      <section className="px-4 mt-6 pb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xl font-bold text-gray-900">Sabores</h2>
+          <Link to="/categoria/sabores" className="text-sm text-gray-500 underline">Ver todos &rsaquo;</Link>
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+          {saboresProducts.slice(0, 10).map((p) => (
+            <div key={p.id} className="min-w-44 shrink-0">
+              <ProductCard
+                product={p}
+                favorited={favoriteIds.has(p.id)}
+                initialQty={cartQty.get(p.id) ?? 0}
+              />
+            </div>
+          ))}
+          {!error && saboresProducts.length === 0 && (
+            <p className="text-sm text-gray-400 py-4">Nenhum produto de sabores no momento.</p>
           )}
         </div>
       </section>

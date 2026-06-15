@@ -15,6 +15,7 @@ export default function BottomNav({ onMenuClick, isMenuOpen }: BottomNavProps) {
     else if (location.pathname === '/') setActiveIndex(0);
     else if (location.pathname.startsWith('/pedido')) setActiveIndex(1);
     else if (location.pathname.startsWith('/conta')) setActiveIndex(2);
+    else setActiveIndex(-1);
   }, [location.pathname, isMenuOpen]);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -25,11 +26,11 @@ export default function BottomNav({ onMenuClick, isMenuOpen }: BottomNavProps) {
   return (
     <nav className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 pb-safe md:hidden z-20">
       {/* Animated indicator line */}
-      <div 
-        className="absolute -top-px left-0 h-0.5 bg-red-600 transition-transform duration-300 ease-in-out"
-        style={{ 
-          width: '25%', 
-          transform: `translateX(${activeIndex * 100}%)` 
+      <div
+        className={`absolute -top-px left-0 h-0.5 bg-red-600 transition-all duration-300 ease-in-out ${activeIndex < 0 ? 'opacity-0' : ''}`}
+        style={{
+          width: '25%',
+          transform: `translateX(${activeIndex * 100}%)`
         }}
       />
 
