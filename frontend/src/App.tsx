@@ -13,6 +13,7 @@ import Menu from './components/Menu';
 import Order from './pages/Order';
 import User from './pages/User';
 import Login from './pages/Login';
+import Admin from './pages/Admin';
 import { getStoredUser, logout, type AuthUser } from './auth';
 
 function App() {
@@ -20,7 +21,8 @@ function App() {
   const location = useLocation();
   const isCategoryPage = location.pathname.startsWith('/categoria')
     || location.pathname.startsWith('/favoritos')
-    || location.pathname.startsWith('/carrinho');
+    || location.pathname.startsWith('/carrinho')
+    || location.pathname.startsWith('/admin');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -139,6 +141,7 @@ function App() {
             <Route path="/carrinho" element={<Cart />} />
             <Route path="/pedido-concluido" element={<OrderSuccess />} />
             <Route path="/conta" element={<User user={user} onLogout={handleLogout} />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </div>
 

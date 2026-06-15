@@ -9,6 +9,9 @@ export interface Category {
 }
 
 export interface Product {
+  packageType: string;
+  volume: any;
+  unitCount: number;
   id: number;
   name: string;
   slug: string;

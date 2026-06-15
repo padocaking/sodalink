@@ -101,6 +101,14 @@ export default function User({ user, onLogout }: { user: AuthUser; onLogout: () 
         </div>
       </section>
 
+      {/* Administração section */}
+      <section>
+        <h2 className="text-lg font-bold text-gray-800 mb-3">Administração</h2>
+        <div className="bg-white rounded-2xl px-5 shadow-sm">
+          <AccountRow icon={miLg('admin_panel_settings')} label="Painel do Admin" onClick={() => navigate('/admin')} />
+        </div>
+      </section>
+
       {/* Footer */}
       <div className="pt-1 pb-4">
         <button onClick={onLogout} className="text-base font-bold underline text-gray-800 mb-1">Sair</button>
